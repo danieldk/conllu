@@ -93,7 +93,7 @@ where
 ///
 /// This enum is used in the underlying `petgraph` graph to distinguish
 /// between edges from the non-projective and projective dependency
-/// layers in a CoNLL-X graph. This enum is public because the underlying
+/// layers in a CoNLL-U graph. This enum is public because the underlying
 /// `DiGraph` can be retrieved using the `get_ref` and `into_inner` methods
 /// of `Sentence`.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -105,11 +105,11 @@ pub enum Projectivity {
 /// Dependency edge.
 pub type Edge = (Projectivity, Option<String>);
 
-/// A CoNLL-X dependency graph.
+/// A CoNLL-U dependency graph.
 ///
 /// `Sentence` stores a dependency graph. The nodes in the graph
 /// (except the special root node) are tokens that have the fields
-/// of the CoNLL-X format. Dependency relations are stored as edges
+/// of the CoNLL-U format. Dependency relations are stored as edges
 /// in the graph.
 ///
 /// This data structure is a thin wrapper around the `petgraph`
@@ -127,9 +127,7 @@ impl Sentence {
     /// the root of the dependency graph:
     ///
     /// ```
-    /// extern crate conllx;
-    ///
-    /// use conllx::graph::{Node, Sentence};
+    /// use conllu::graph::{Node, Sentence};
     ///
     /// let sentence = Sentence::new();
     /// assert_eq!(sentence[0], Node::Root);
@@ -356,7 +354,7 @@ impl PartialEq for Sentence {
 
 /// A graph view.
 ///
-/// This data structure provides a view of a CoNLL-X dependency graph. The
+/// This data structure provides a view of a CoNLL-U dependency graph. The
 /// view can be used to retrieve the dependents of a head or the head of a
 /// dependent.
 pub struct DepGraph<'a> {
@@ -421,7 +419,7 @@ impl<'a, 'b> PartialEq<DepGraph<'b>> for DepGraph<'a> {
 
 /// A mutable graph view.
 ///
-/// This data structure provides a mutable view of a CoNLL-X dependency
+/// This data structure provides a mutable view of a CoNLL-U dependency
 /// graph. The view can be used to retrieve the dependents of a head or
 /// the head of a dependent. In addition, the `add_deprel` method can be
 /// used to add dependency relations to the graph.

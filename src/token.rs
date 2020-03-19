@@ -13,7 +13,7 @@ pub const EMPTY_TOKEN: &str = "_";
 
 /// A builder for `Token`s.
 ///
-/// The `Token` type stores a CoNLL-X token. However, since this format
+/// The `Token` type stores a CoNLL-U token. However, since this format
 /// permits a large number of fields, construction of a token can get
 /// tedious. This builder provides a fluent interface for creating `Token`s.
 pub struct TokenBuilder {
@@ -171,7 +171,7 @@ impl Token {
 
 /// Token features.
 ///
-/// In the CoNLL-X specification, these are morphological features of the
+/// In the CoNLL-U specification, these are morphological features of the
 /// token. Typically, the features are a list or a key-value mapping.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Features {

@@ -1,12 +1,8 @@
 #![feature(test)]
 
-extern crate conllx;
-
-extern crate test;
-
 use test::{black_box, Bencher};
 
-use conllx::token::Features;
+use conllu::token::Features;
 
 static FEATURES: &'static [&'static str] = &[
     "cat:regular+noun|case:nominative|number:plural",

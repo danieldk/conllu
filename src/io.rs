@@ -89,8 +89,8 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
             let mut token = Token::new(parse_form_field(iter.next())?);
             token.set_lemma(parse_string_field(iter.next()));
-            token.set_cpos(parse_string_field(iter.next()));
-            token.set_pos(parse_string_field(iter.next()));
+            token.set_upos(parse_string_field(iter.next()));
+            token.set_xpos(parse_string_field(iter.next()));
             token.set_features(parse_string_field(iter.next()).map(|s| Features::from(s.as_str())));
 
             // Head relation.

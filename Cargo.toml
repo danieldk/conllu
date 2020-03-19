@@ -1,0 +1,26 @@
+[package]
+name = "conllx"
+version = "0.12.0"
+edition = "2018"
+authors = ["Daniël de Kok <me@danieldk.eu>"]
+description = "Readers/writers for the CoNLL-X dependency format"
+documentation = "https://docs.rs/conllx/"
+homepage = "https://github.com/danieldk/conllx-rs"
+repository = "https://github.com/danieldk/conllx-rs"
+license = "Apache-2.0"
+readme = "README.md"
+exclude = [
+  ".gitignore",
+  ".travis.yml"
+]
+
+[dependencies]
+failure = "0.1"
+itertools = "0.8"
+petgraph = "0.4"
+
+[dev-dependencies]
+lazy_static = "1"
+maplit = "1"
+pretty_assertions = "0.6"
+quickcheck = "0.9"

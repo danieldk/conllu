@@ -1,0 +1,5 @@
+1	Die	die	ART	ART	nsf	2	DET	0	TEST
+2	Großaufnahme	Großaufnahme	N	NN	nsf	0	ROOT
+
+1	Gilles	Gilles	N	NE	nsm	0	ROOT
+2	Deleuze	Deleuze	N	NE	case:nominative|number:singular|gender:masculine	1	APP

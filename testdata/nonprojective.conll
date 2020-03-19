@@ -1,0 +1,39 @@
+1	Für	_	_	_	_	8	PP	_	_
+2	diese	_	_	_	_	3	DET	_	_
+3	Behauptung	_	_	_	_	1	PN	_	_
+4	hat	_	_	_	_	0	ROOT	_	_
+5	Beckmeyer	_	_	_	_	4	SUBJ	_	_
+6	bisher	_	_	_	_	9	ADV	_	_
+7	keinen	_	_	_	_	8	DET	_	_
+8	Nachweis	_	_	_	_	9	OBJA	_	_
+9	geliefert	_	_	_	_	4	AUX	_	_
+10	.	_	_	_	_	9	-PUNCT-	_	_
+
+1	Auch	_	_	_	_	2	ADV	_	_
+2	für	_	_	_	_	10	PP	_	_
+3	Rumänien	_	_	_	_	2	PN	_	_
+4	selbst	_	_	_	_	3	ADV	_	_
+5	ist	_	_	_	_	0	ROOT	_	_
+6	der	_	_	_	_	7	DET	_	_
+7	Papst-Besuch	_	_	_	_	5	SUBJ	_	_
+8	von	_	_	_	_	5	PRED	_	_
+9	großer	_	_	_	_	10	ATTR	_	_
+10	Bedeutung	_	_	_	_	8	PN	_	_
+11	.	_	_	_	_	10	-PUNCT-	_	_
+
+1	Z	_	_	_	_	5	AuxP	_	_
+2	nich	_	_	_	_	1	Atr	_	_
+3	je	_	_	_	_	0	ROOT	_	_
+4	jen	_	_	_	_	5	AuxZ	_	_
+5	jedna	_	_	_	_	3	Sb	_	_
+6	na	_	_	_	_	3	AuxP	_	_
+7	kvalitu	_	_	_	_	6	Adv	_	_
+8	.	_	_	_	_	3	AuxZ	_	_
+
+1	a	_	_	_	_	4	a	_	_
+2	b	_	_	_	_	4	b	_	_
+3	c	_	_	_	_	1	c	_	_
+4	d	_	_	_	_	0	ROOT	_	_
+5	e	_	_	_	_	7	e	_	_
+6	f	_	_	_	_	4	f	_	_
+7	g	_	_	_	_	4	g	_	_

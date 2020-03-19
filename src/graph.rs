@@ -238,7 +238,10 @@ impl Display for Sentence {
                 token.lemma().unwrap_or("_"),
                 token.cpos().unwrap_or("_"),
                 token.pos().unwrap_or("_"),
-                token.features().map(Into::into).unwrap_or("_".to_string()),
+                token
+                    .features()
+                    .map(Into::into)
+                    .unwrap_or_else(|| "_".to_string()),
                 head.unwrap_or_else(|| "_".to_string()),
                 head_rel.unwrap_or_else(|| "_".to_string()),
                 phead.unwrap_or_else(|| "_".to_string()),
@@ -528,7 +531,7 @@ fn dependents_impl(
         .map(|e| {
             DepTriple::new(
                 e.source().index(),
-                e.weight().1.as_ref().map(String::as_str),
+                e.weight().1.as_deref(),
                 e.target().index(),
             )
         })
@@ -545,7 +548,7 @@ fn head_impl(
         .map(|e| {
             DepTriple::new(
                 e.source().index(),
-                e.weight().1.as_ref().map(String::as_str),
+                e.weight().1.as_deref(),
                 e.target().index(),
             )
         })

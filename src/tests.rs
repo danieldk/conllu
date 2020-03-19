@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -17,7 +18,9 @@ lazy_static! {
                 .lemma("die")
                 .upos("ART")
                 .xpos("ART")
-                .features(Features::from("nsf"))
+                .features(
+                    Features::try_from("case=nominative|gender=feminine|number=singular").unwrap(),
+                )
                 .into(),
         );
 
@@ -26,7 +29,9 @@ lazy_static! {
                 .lemma("Großaufnahme")
                 .upos("N")
                 .xpos("NN")
-                .features(Features::from("nsf"))
+                .features(
+                    Features::try_from("case=nominative|gender=feminine|number=singular").unwrap(),
+                )
                 .into(),
         );
 
@@ -45,7 +50,9 @@ lazy_static! {
                 .lemma("Gilles")
                 .upos("N")
                 .xpos("NE")
-                .features(Features::from("nsm"))
+                .features(
+                    Features::try_from("case=nominative|gender=masculine|number=singular").unwrap(),
+                )
                 .into(),
         );
         s2.push(
@@ -53,9 +60,9 @@ lazy_static! {
                 .lemma("Deleuze")
                 .upos("N")
                 .xpos("NE")
-                .features(Features::from(
-                    "case:nominative|gender:masculine|number:singular",
-                ))
+                .features(
+                    Features::try_from("case=nominative|gender=masculine|number=singular").unwrap(),
+                )
                 .into(),
         );
         s2.dep_graph_mut()

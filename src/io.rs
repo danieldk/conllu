@@ -1,5 +1,6 @@
 //! CoNLL-U format reader and writers.
 
+use std::convert::TryFrom;
 use std::io;
 
 use failure::Error;
@@ -91,7 +92,11 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             token.set_lemma(parse_string_field(iter.next()));
             token.set_upos(parse_string_field(iter.next()));
             token.set_xpos(parse_string_field(iter.next()));
-            token.set_features(parse_string_field(iter.next()).map(|s| Features::from(s.as_str())));
+            token.set_features(
+                parse_string_field(iter.next())
+                    .map(|s| Features::try_from(s.as_str()))
+                    .transpose()?,
+            );
 
             // Head relation.
             if let Some(head) = parse_numeric_field(iter.next())? {

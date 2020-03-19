@@ -99,5 +99,4 @@ mod tests {
             .collect();
         assert_eq!(*GRAPH_DEPTH_4_BFS_WITH_DEPTH, visits);
     }
-
 }

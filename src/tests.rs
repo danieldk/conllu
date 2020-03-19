@@ -3,9 +3,9 @@ use std::io::BufReader;
 
 use lazy_static::lazy_static;
 
+use crate::conllx::io::{ReadSentence, Reader};
+use crate::conllx::token::{Features, TokenBuilder};
 use crate::graph::{DepTriple, Sentence};
-use crate::io::{ReadSentence, Reader};
-use crate::token::{Features, TokenBuilder};
 
 lazy_static! {
     pub static ref TEST_SENTENCES: Vec<Sentence> = {

@@ -4,9 +4,9 @@ use std::io;
 
 use failure::Error;
 
+use crate::conllx::token::{Features, Token, EMPTY_TOKEN};
 use crate::error::ReadError;
 use crate::graph::{DepTriple, Sentence};
-use crate::token::{Features, Token, EMPTY_TOKEN};
 
 /// A trait for objects that can read CoNLL-X `Sentence`s
 pub trait ReadSentence {
@@ -239,9 +239,9 @@ impl<W: io::Write> Writer<W> {
     /// ```
     /// use std::str;
     ///
-    /// use conllx::io::{Writer, WriteSentence};
-    /// use conllx::graph::Sentence;
-    /// use conllx::token::Token;
+    /// use conll::conllx::io::{Writer, WriteSentence};
+    /// use conll::graph::Sentence;
+    /// use conll::conllx::token::Token;
     ///
     /// let output = Vec::new();
     /// let mut writer = Writer::new(output);

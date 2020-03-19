@@ -9,7 +9,7 @@ use petgraph::graph::{node_index, DiGraph, NodeIndices, NodeWeightsMut};
 use petgraph::visit::EdgeRef;
 use petgraph::Direction;
 
-use crate::token::Token;
+use crate::conllx::token::Token;
 
 /// Dependency graph node.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -127,9 +127,7 @@ impl Sentence {
     /// the root of the dependency graph:
     ///
     /// ```
-    /// extern crate conllx;
-    ///
-    /// use conllx::graph::{Node, Sentence};
+    /// use conll::graph::{Node, Sentence};
     ///
     /// let sentence = Sentence::new();
     /// assert_eq!(sentence[0], Node::Root);

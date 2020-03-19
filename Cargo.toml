@@ -1,12 +1,12 @@
 [package]
-name = "conllx"
-version = "0.12.0"
+name = "conll"
+version = "0.1.0"
 edition = "2018"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
-description = "Readers/writers for the CoNLL-X dependency format"
-documentation = "https://docs.rs/conllx/"
-homepage = "https://github.com/danieldk/conllx-rs"
-repository = "https://github.com/danieldk/conllx-rs"
+description = "Readers/writers for the CoNLL dependency formats"
+documentation = "https://docs.rs/conll/"
+homepage = "https://github.com/danieldk/conll"
+repository = "https://github.com/danieldk/conll"
 license = "Apache-2.0"
 readme = "README.md"
 exclude = [

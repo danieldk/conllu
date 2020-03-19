@@ -8,6 +8,8 @@ pub(crate) use crate::graph_algo::BfsWithDepth;
 
 pub mod proj;
 
+pub mod conllu;
+
 pub mod conllx;
 
 #[cfg(test)]

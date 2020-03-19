@@ -7,6 +7,10 @@ pub enum ReadError {
     #[fail(display = "form field is missing")]
     MissingFormField,
 
+    /// The feature field could not be parsed
+    #[fail(display = "cannot parse feature field: {}", value)]
+    ParseFeatureField { value: String },
+
     /// An integer field could not be parsed as an integer.
     #[fail(display = "cannot parse as integer field: {}", value)]
     ParseIntField { value: String },

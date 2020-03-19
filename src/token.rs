@@ -1,6 +1,7 @@
 //! Tokens in the dependency graph.
 
 use std::collections::BTreeMap;
+use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Display;
 use std::iter::FromIterator;
@@ -8,6 +9,8 @@ use std::mem;
 use std::ops::{Deref, DerefMut};
 
 use itertools::Itertools;
+
+use crate::error::ReadError;
 
 pub const EMPTY_TOKEN: &str = "_";
 
@@ -175,7 +178,7 @@ impl Token {
 /// token. Typically, the features are a list or a key-value mapping.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Features {
-    inner: BTreeMap<String, Option<String>>,
+    inner: BTreeMap<String, String>,
 }
 
 impl Features {
@@ -187,23 +190,22 @@ impl Features {
     }
 
     /// Unwrap the contained feature map.
-    pub fn into_inner(self) -> BTreeMap<String, Option<String>> {
+    pub fn into_inner(self) -> BTreeMap<String, String> {
         self.inner
     }
 
-    fn parse_features(feature_string: impl AsRef<str>) -> BTreeMap<String, Option<String>> {
+    fn parse_features(feature_string: impl AsRef<str>) -> Result<Self, ReadError> {
         let mut features = BTreeMap::new();
 
         for fv in feature_string.as_ref().split('|') {
-            let fv: &str = fv;
-            let (k, v) = fv
-                .find(':')
-                .map(|idx| (fv[..idx].to_owned(), Some(fv[idx + 1..].to_owned())))
-                .unwrap_or_else(|| (fv.to_owned(), None));
-            features.insert(k, v);
+            let idx = fv.find('=').ok_or(ReadError::ParseFeatureField {
+                value: fv.to_owned(),
+            })?;
+
+            features.insert(fv[..idx].to_owned(), fv[idx + 1..].to_owned());
         }
 
-        features
+        Ok(Features { inner: features })
     }
 }
 
@@ -214,7 +216,7 @@ impl Default for Features {
 }
 
 impl Deref for Features {
-    type Target = BTreeMap<String, Option<String>>;
+    type Target = BTreeMap<String, String>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
@@ -234,31 +236,30 @@ impl Display for Features {
     }
 }
 
-impl From<BTreeMap<String, Option<String>>> for Features {
-    fn from(feature_map: BTreeMap<String, Option<String>>) -> Self {
+impl From<BTreeMap<String, String>> for Features {
+    fn from(feature_map: BTreeMap<String, String>) -> Self {
         Features { inner: feature_map }
     }
 }
 
-impl From<&str> for Features {
-    fn from(feature_string: &str) -> Self {
-        Features {
-            inner: Features::parse_features(feature_string),
-        }
+impl TryFrom<&str> for Features {
+    type Error = ReadError;
+
+    fn try_from(feature_string: &str) -> Result<Self, Self::Error> {
+        Features::parse_features(feature_string)
     }
 }
 
-impl<S, T> FromIterator<(S, Option<T>)> for Features
+impl<S, T> FromIterator<(S, T)> for Features
 where
     S: Into<String>,
     T: Into<String>,
 {
     fn from_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = (S, Option<T>)>,
+        I: IntoIterator<Item = (S, T)>,
     {
-        let features =
-            BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
+        let features = BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.into())));
 
         Features { inner: features }
     }
@@ -275,10 +276,7 @@ impl From<&Features> for String {
         features
             .inner
             .iter()
-            .map(|(k, v)| match *v {
-                Some(ref v) => format!("{}:{}", k, v),
-                None => k.to_owned(),
-            })
+            .map(|(k, v)| format!("{}={}", k, v))
             .join("|")
     }
 }
@@ -286,6 +284,7 @@ impl From<&Features> for String {
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
+    use std::convert::TryFrom;
     use std::iter::FromIterator;
 
     use maplit::btreemap;
@@ -294,7 +293,7 @@ mod tests {
     use super::{Features, Token, TokenBuilder};
 
     quickcheck! {
-        fn features_from_iter(feature_map: BTreeMap<String, Option<String>>) -> bool{
+        fn features_from_iter(feature_map: BTreeMap<String, String>) -> bool{
             feature_map == *Features::from_iter(feature_map.clone())
         }
     }
@@ -302,35 +301,24 @@ mod tests {
     #[test]
     fn features_from_iter_as_string() {
         let feature_map = btreemap! {
-            "feature2" => Some("y"),
-            "feature3" => None,
-            "feature1" => Some("x")
+            "feature2" => "y",
+            "feature1" => "x"
         };
 
         let features = Features::from_iter(feature_map);
         let features_string: String = features.into();
 
-        assert_eq!(features_string, "feature1:x|feature2:y|feature3");
+        assert_eq!(features_string, "feature1=x|feature2=y");
     }
 
     #[test]
     fn features_with_colons() {
-        let f = "Some:feature:with|additional:colons|feature";
-        let features = Features::from(f);
-        let some = features.get("Some").unwrap().as_ref().map(String::as_str);
-        assert_eq!(some, Some("feature:with"));
-        let additional = features
-            .get("additional")
-            .unwrap()
-            .as_ref()
-            .map(String::as_str);
-        assert_eq!(additional, Some("colons"));
-        let feature = features
-            .get("feature")
-            .unwrap()
-            .as_ref()
-            .map(String::as_str);
-        assert_eq!(feature, None);
+        let f = "Some=feature=with|additional=colons";
+        let features = Features::try_from(f).unwrap();
+        let some = features.get("Some").unwrap();
+        assert_eq!(some, "feature=with");
+        let additional = features.get("additional").unwrap();
+        assert_eq!(additional, "colons");
     }
 
     #[test]
@@ -350,47 +338,39 @@ mod tests {
                 .lemma("Gilles")
                 .upos("N")
                 .xpos("NE")
-                .features(Features::from(
-                    "case:nominative|number:singular|gender:masculine",
-                ))
+                .features(
+                    Features::try_from("case=nominative|number=singular|gender=masculine").unwrap(),
+                )
                 .into(),
             TokenBuilder::new("Deleuze")
                 .lemma("Deleuze")
                 .upos("N")
                 .xpos("NE")
-                .features(Features::from("nominative|singular|masculine"))
+                .features(
+                    Features::try_from("case=nominative|number=singular|gender=masculine").unwrap(),
+                )
                 .into(),
         ]
     }
 
-    fn features_correct() -> Vec<BTreeMap<String, Option<String>>> {
-        let mut correct1 = BTreeMap::new();
-        correct1.insert("case".to_owned(), Some("nominative".to_owned()));
-        correct1.insert("number".to_owned(), Some("singular".to_owned()));
-        correct1.insert("gender".to_owned(), Some("masculine".to_owned()));
+    fn features_correct() -> Vec<BTreeMap<String, String>> {
+        let mut correct = BTreeMap::new();
+        correct.insert("case".to_owned(), "nominative".to_owned());
+        correct.insert("number".to_owned(), "singular".to_owned());
+        correct.insert("gender".to_owned(), "masculine".to_owned());
 
-        let mut correct2 = BTreeMap::new();
-        correct2.insert("nominative".to_owned(), None);
-        correct2.insert("singular".to_owned(), None);
-        correct2.insert("masculine".to_owned(), None);
-
-        vec![correct1, correct2]
+        vec![correct.clone(), correct]
     }
 
     #[test]
     fn eq_features_is_order_insensitive() {
         let token1: Token = TokenBuilder::new("a")
-            .features(Features::from("a|b:c"))
+            .features(Features::try_from("a=b|c=d").unwrap())
             .into();
         let token2 = TokenBuilder::new("a")
-            .features(Features::from("b:c|a"))
-            .into();
-        let token3: Token = TokenBuilder::new("a")
-            .features(Features::from("b|a:c"))
+            .features(Features::try_from("c=d|a=b").unwrap())
             .into();
 
         assert_eq!(token1, token2);
-        assert_ne!(token1, token3);
-        assert_ne!(token2, token3);
     }
 }

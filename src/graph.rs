@@ -234,8 +234,8 @@ impl Display for Sentence {
                 i,
                 token.form(),
                 token.lemma().unwrap_or("_"),
-                token.cpos().unwrap_or("_"),
-                token.pos().unwrap_or("_"),
+                token.upos().unwrap_or("_"),
+                token.xpos().unwrap_or("_"),
                 token
                     .features()
                     .map(Into::into)
@@ -653,7 +653,7 @@ mod tests {
 
         let mut g4 = g1.clone();
         if let Node::Token(ref mut token) = g4[3] {
-            token.set_pos(Some("verb"));
+            token.set_xpos(Some("verb"));
         }
         assert_ne!(g1, g4);
     }

@@ -15,8 +15,8 @@ lazy_static! {
         s1.push(
             TokenBuilder::new("Die")
                 .lemma("die")
-                .cpos("ART")
-                .pos("ART")
+                .upos("ART")
+                .xpos("ART")
                 .features(Features::from("nsf"))
                 .into(),
         );
@@ -24,8 +24,8 @@ lazy_static! {
         s1.push(
             TokenBuilder::new("Großaufnahme")
                 .lemma("Großaufnahme")
-                .cpos("N")
-                .pos("NN")
+                .upos("N")
+                .xpos("NN")
                 .features(Features::from("nsf"))
                 .into(),
         );
@@ -43,16 +43,16 @@ lazy_static! {
         s2.push(
             TokenBuilder::new("Gilles")
                 .lemma("Gilles")
-                .cpos("N")
-                .pos("NE")
+                .upos("N")
+                .xpos("NE")
                 .features(Features::from("nsm"))
                 .into(),
         );
         s2.push(
             TokenBuilder::new("Deleuze")
                 .lemma("Deleuze")
-                .cpos("N")
-                .pos("NE")
+                .upos("N")
+                .xpos("NE")
                 .features(Features::from(
                     "case:nominative|gender:masculine|number:singular",
                 ))

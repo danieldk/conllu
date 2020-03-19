@@ -40,15 +40,15 @@ impl TokenBuilder {
         self
     }
 
-    /// Set the coarse-grained part-of-speech tag.
-    pub fn cpos(mut self, cpos: impl Into<String>) -> TokenBuilder {
-        self.token.set_cpos(Some(cpos));
+    /// Set the universal part-of-speech tag.
+    pub fn upos(mut self, upos: impl Into<String>) -> TokenBuilder {
+        self.token.set_upos(Some(upos));
         self
     }
 
-    /// Set the fine-grained part-of-speech tag.
-    pub fn pos(mut self, pos: impl Into<String>) -> TokenBuilder {
-        self.token.set_pos(Some(pos));
+    /// Set the language-specific part-of-speech tag.
+    pub fn xpos(mut self, xpos: impl Into<String>) -> TokenBuilder {
+        self.token.set_xpos(Some(xpos));
         self
     }
 
@@ -75,8 +75,8 @@ impl From<TokenBuilder> for Token {
 pub struct Token {
     form: String,
     lemma: Option<String>,
-    cpos: Option<String>,
-    pos: Option<String>,
+    upos: Option<String>,
+    xpos: Option<String>,
     features: Option<Features>,
 }
 
@@ -86,8 +86,8 @@ impl Token {
         Token {
             form: form.into(),
             lemma: None,
-            cpos: None,
-            pos: None,
+            upos: None,
+            xpos: None,
             features: None,
         }
     }
@@ -102,14 +102,14 @@ impl Token {
         self.lemma.as_ref().map(String::as_ref)
     }
 
-    /// Get the coarse-grained part-of-speech tag.
-    pub fn cpos(&self) -> Option<&str> {
-        self.cpos.as_ref().map(String::as_ref)
+    /// Get the universal part-of-speech tag.
+    pub fn upos(&self) -> Option<&str> {
+        self.upos.as_ref().map(String::as_ref)
     }
 
-    /// Get the fine-grained part-of-speech tag.
-    pub fn pos(&self) -> Option<&str> {
-        self.pos.as_ref().map(String::as_ref)
+    /// Get the language-specific part-of-speech tag.
+    pub fn xpos(&self) -> Option<&str> {
+        self.xpos.as_ref().map(String::as_ref)
     }
 
     /// Get the syntactic and/or morphological features of the token.
@@ -141,24 +141,24 @@ impl Token {
         mem::replace(&mut self.lemma, lemma.map(Into::into))
     }
 
-    /// Set the coarse-grained part-of-speech tag.
+    /// Set the universal part-of-speech tag.
     ///
-    /// Returns the coarse-grained part-of-speech tag that is replaced.
-    pub fn set_cpos<S>(&mut self, cpos: Option<S>) -> Option<String>
+    /// Returns the universal part-of-speech tag that is replaced.
+    pub fn set_upos<S>(&mut self, upos: Option<S>) -> Option<String>
     where
         S: Into<String>,
     {
-        mem::replace(&mut self.cpos, cpos.map(Into::into))
+        mem::replace(&mut self.upos, upos.map(Into::into))
     }
 
-    /// Set the fine-grained part-of-speech tag.
+    /// Set the language-specific part-of-speech tag.
     ///
-    /// Returns the fine-grained part-of-speech tag that is replaced.
-    pub fn set_pos<S>(&mut self, pos: Option<S>) -> Option<String>
+    /// Returns the language-specific part-of-speech tag that is replaced.
+    pub fn set_xpos<S>(&mut self, xpos: Option<S>) -> Option<String>
     where
         S: Into<String>,
     {
-        mem::replace(&mut self.pos, pos.map(Into::into))
+        mem::replace(&mut self.xpos, xpos.map(Into::into))
     }
 
     /// Set the syntactic and/or morphological features of the token.
@@ -348,16 +348,16 @@ mod tests {
         vec![
             TokenBuilder::new("Gilles")
                 .lemma("Gilles")
-                .cpos("N")
-                .pos("NE")
+                .upos("N")
+                .xpos("NE")
                 .features(Features::from(
                     "case:nominative|number:singular|gender:masculine",
                 ))
                 .into(),
             TokenBuilder::new("Deleuze")
                 .lemma("Deleuze")
-                .cpos("N")
-                .pos("NE")
+                .upos("N")
+                .xpos("NE")
                 .features(Features::from("nominative|singular|masculine"))
                 .into(),
         ]

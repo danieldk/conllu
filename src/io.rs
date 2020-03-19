@@ -1,4 +1,4 @@
-//! CoNLL-X format reader and writers.
+//! CoNLL-U format reader and writers.
 
 use std::io;
 
@@ -8,7 +8,7 @@ use crate::error::ReadError;
 use crate::graph::{DepTriple, Sentence};
 use crate::token::{Features, Token, EMPTY_TOKEN};
 
-/// A trait for objects that can read CoNLL-X `Sentence`s
+/// A trait for objects that can read CoNLL-U `Sentence`s
 pub trait ReadSentence {
     /// Read a `Sentence` from this object.
     ///
@@ -27,7 +27,7 @@ pub trait ReadSentence {
     }
 }
 
-/// A reader for CoNLL-X sentences.
+/// A reader for CoNLL-U sentences.
 pub struct Reader<R> {
     read: R,
 }
@@ -204,7 +204,7 @@ fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, ReadError> 
     }
 }
 
-/// A trait for objects that can write CoNLL-X `Sentence`s.
+/// A trait for objects that can write CoNLL-U `Sentence`s.
 pub trait WriteSentence {
     /// Write a sentence into this object.
     ///
@@ -215,9 +215,9 @@ pub trait WriteSentence {
     fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error>;
 }
 
-/// A writer for CoNLL-X sentences.
+/// A writer for CoNLL-U sentences.
 ///
-/// This writer will write sentences to the embedded writer in CoNLL-X
+/// This writer will write sentences to the embedded writer in CoNLL-U
 /// tabular format.
 pub struct Writer<W> {
     write: W,
@@ -239,9 +239,9 @@ impl<W: io::Write> Writer<W> {
     /// ```
     /// use std::str;
     ///
-    /// use conllx::io::{Writer, WriteSentence};
-    /// use conllx::graph::Sentence;
-    /// use conllx::token::Token;
+    /// use conllu::io::{Writer, WriteSentence};
+    /// use conllu::graph::Sentence;
+    /// use conllu::token::Token;
     ///
     /// let output = Vec::new();
     /// let mut writer = Writer::new(output);
@@ -271,7 +271,7 @@ impl<W: io::Write> WriteSentence for Writer<W> {
     }
 }
 
-/// A writer for CoNLL-X sentences that partitions incoming objects
+/// A writer for CoNLL-U sentences that partitions incoming objects
 /// among multiple writers.
 ///
 /// For example, suppose that a `PartitioningWriter` is wraps writers

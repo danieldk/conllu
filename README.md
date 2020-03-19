@@ -1,18 +1,10 @@
-[![Crate](https://img.shields.io/crates/v/conllx.svg)](https://crates.io/crates/conllx)
-[![Docs](https://docs.rs/conllx/badge.svg)](https://docs.rs/conllx/)
-[![Build Status](https://travis-ci.org/danieldk/conllx-rs.svg?branch=master)](https://travis-ci.org/danieldk/conllx-rs)
+[![Crate](https://img.shields.io/crates/v/conllu.svg)](https://crates.io/crates/conllu)
+[![Docs](https://docs.rs/conllu/badge.svg)](https://docs.rs/conllu/)
 
 ## Introduction
 
-This is a package for reading and writing CONLL-X files in Rust. Please
-consult the [API documentation](http://rustdoc.danieldk.eu/conllx/) for
+This is a package for reading and writing CoNLL-U files in Rust. Please
+consult the [API documentation](https://docs.rs/conllu/) for
 usage information.
 
-**Note:** This package is still new, its API will change.
-
-## Installation
-
-This package can be used with Cargo:
-
-    [dependencies]
-    conllx = 0.9
+**Note:** This crate is still new, its API will change.

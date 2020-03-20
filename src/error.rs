@@ -1,7 +1,7 @@
 use failure::Fail;
 
 /// CoNLL-U read errors.
-#[derive(Debug, Fail)]
+#[derive(Debug, Eq, Fail, PartialEq)]
 pub enum ReadError {
     /// The form is missing in the CoNLL-U data.
     #[fail(display = "form field is missing")]

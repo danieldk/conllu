@@ -337,6 +337,7 @@ mod tests {
     use quickcheck::quickcheck;
 
     use super::{Features, Token, TokenBuilder};
+    use crate::error::ReadError;
 
     quickcheck! {
         fn features_from_iter(feature_map: BTreeMap<String, String>) -> bool{
@@ -418,5 +419,15 @@ mod tests {
             .into();
 
         assert_eq!(token1, token2);
+    }
+
+    #[test]
+    fn feature_without_value_results_in_error() {
+        assert_eq!(
+            Features::try_from("c=d|a"),
+            Err(ReadError::ParseFeatureField {
+                value: "a".to_string()
+            })
+        );
     }
 }

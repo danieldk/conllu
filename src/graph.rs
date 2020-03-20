@@ -89,21 +89,21 @@ where
     }
 }
 
-/// Relation projectivity.
+/// Relation type.
 ///
-/// This enum is used in the underlying `petgraph` graph to distinguish
-/// between edges from the non-projective and projective dependency
-/// layers in a CoNLL-U graph. This enum is public because the underlying
-/// `DiGraph` can be retrieved using the `get_ref` and `into_inner` methods
-/// of `Sentence`.
+/// This enum is used in the underlying `petgraph` graph to
+/// distinguish between universal dependencies and enhanced universal
+/// dependencies.  This enum is public because the underlying
+/// `DiGraph` can be retrieved using the `get_ref` and `into_inner`
+/// methods of `Sentence`.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Projectivity {
-    Projective,
-    NonProjective,
+pub enum RelationType {
+    Regular,
+    Enhanced,
 }
 
 /// Dependency edge.
-pub type Edge = (Projectivity, Option<String>);
+pub type Edge = (RelationType, Option<String>);
 
 /// A CoNLL-U dependency graph.
 ///
@@ -171,35 +171,19 @@ impl Sentence {
         self.0.add_node(Node::Token(token)).index()
     }
 
-    /// Get the non-projective dependency graph.
+    /// Get the dependency graph.
     pub fn dep_graph(&self) -> DepGraph {
         DepGraph {
             inner: &self.0,
-            proj: Projectivity::NonProjective,
+            relation_type: RelationType::Regular,
         }
     }
 
-    /// Get the non-projective graph mutably.
+    /// Get the graph mutably.
     pub fn dep_graph_mut(&mut self) -> DepGraphMut {
         DepGraphMut {
             inner: &mut self.0,
-            proj: Projectivity::NonProjective,
-        }
-    }
-
-    /// Get the projective graph.
-    pub fn proj_dep_graph(&self) -> DepGraph {
-        DepGraph {
-            inner: &self.0,
-            proj: Projectivity::Projective,
-        }
-    }
-
-    /// Get the projective graph mutably.
-    pub fn proj_dep_graph_mut(&mut self) -> DepGraphMut {
-        DepGraphMut {
-            inner: &mut self.0,
-            proj: Projectivity::Projective,
+            relation_type: RelationType::Regular,
         }
     }
 
@@ -226,11 +210,10 @@ impl Display for Sentence {
             };
 
             let (head, head_rel) = triple_to_string(&self.dep_graph(), i);
-            let (phead, phead_rel) = triple_to_string(&self.proj_dep_graph(), i);
 
             writeln!(
                 fmt,
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t_\t_",
                 i,
                 token.form(),
                 token.lemma().unwrap_or("_"),
@@ -242,8 +225,6 @@ impl Display for Sentence {
                     .unwrap_or_else(|| "_".to_string()),
                 head.unwrap_or_else(|| "_".to_string()),
                 head_rel.unwrap_or_else(|| "_".to_string()),
-                phead.unwrap_or_else(|| "_".to_string()),
-                phead_rel.unwrap_or_else(|| "_".to_string()),
             )?;
         }
 
@@ -348,7 +329,7 @@ impl IndexMut<usize> for Sentence {
 
 impl PartialEq for Sentence {
     fn eq(&self, other: &Self) -> bool {
-        self.dep_graph() == other.dep_graph() && self.proj_dep_graph() == other.proj_dep_graph()
+        self.dep_graph() == other.dep_graph()
     }
 }
 
@@ -359,19 +340,19 @@ impl PartialEq for Sentence {
 /// dependent.
 pub struct DepGraph<'a> {
     inner: &'a DiGraph<Node, Edge>,
-    proj: Projectivity,
+    relation_type: RelationType,
 }
 
 #[allow(clippy::len_without_is_empty)]
 impl<'a> DepGraph<'a> {
     /// Return an iterator over the dependents of `head`.
     pub fn dependents(&self, head: usize) -> impl Iterator<Item = DepTriple<&'a str>> {
-        dependents_impl(self.inner, self.proj, head)
+        dependents_impl(self.inner, self.relation_type, head)
     }
 
     /// Return the head relation of `dependent`, if any.
     pub fn head(&self, dependent: usize) -> Option<DepTriple<&'a str>> {
-        head_impl(self.inner, self.proj, dependent)
+        head_impl(self.inner, self.relation_type, dependent)
     }
 
     /// Get the number of nodes in the dependency graph.
@@ -425,7 +406,7 @@ impl<'a, 'b> PartialEq<DepGraph<'b>> for DepGraph<'a> {
 /// used to add dependency relations to the graph.
 pub struct DepGraphMut<'a> {
     inner: &'a mut DiGraph<Node, Edge>,
-    proj: Projectivity,
+    relation_type: RelationType,
 }
 
 #[allow(clippy::len_without_is_empty)]
@@ -451,7 +432,7 @@ impl<'a> DepGraphMut<'a> {
         if let Some(id) = self
             .inner
             .edges_directed(node_index(triple.dependent), Direction::Incoming)
-            .filter(|e| e.weight().0 == self.proj)
+            .filter(|e| e.weight().0 == self.relation_type)
             .map(|e| e.id())
             .next()
         {
@@ -461,18 +442,18 @@ impl<'a> DepGraphMut<'a> {
         self.inner.add_edge(
             node_index(triple.head),
             node_index(triple.dependent),
-            (self.proj, triple.relation.map(Into::into)),
+            (self.relation_type, triple.relation.map(Into::into)),
         );
     }
 
     /// Return an iterator over the dependents of `head`.
     pub fn dependents(&self, head: usize) -> impl Iterator<Item = DepTriple<&str>> {
-        dependents_impl(self.inner, self.proj, head)
+        dependents_impl(self.inner, self.relation_type, head)
     }
 
     /// Return the head relation of `dependent`, if any.
     pub fn head(&self, dependent: usize) -> Option<DepTriple<&str>> {
-        head_impl(self.inner, self.proj, dependent)
+        head_impl(self.inner, self.relation_type, dependent)
     }
 
     /// Remove relation of a token to its head.
@@ -484,7 +465,7 @@ impl<'a> DepGraphMut<'a> {
         match self
             .inner
             .edges_directed(node_index(dependent), Direction::Incoming)
-            .find(|e| e.weight().0 == self.proj)
+            .find(|e| e.weight().0 == self.relation_type)
         {
             Some(edge) => {
                 let head = edge.source().index();
@@ -520,12 +501,12 @@ impl<'a> IndexMut<usize> for DepGraphMut<'a> {
 
 fn dependents_impl(
     graph: &DiGraph<Node, Edge>,
-    proj: Projectivity,
+    relation_type: RelationType,
     head: usize,
 ) -> impl Iterator<Item = DepTriple<&str>> {
     graph
         .edges_directed(node_index(head), Direction::Outgoing)
-        .filter(move |e| e.weight().0 == proj)
+        .filter(move |e| e.weight().0 == relation_type)
         .map(|e| {
             DepTriple::new(
                 e.source().index(),
@@ -537,12 +518,12 @@ fn dependents_impl(
 
 fn head_impl(
     graph: &DiGraph<Node, Edge>,
-    proj: Projectivity,
+    relation_type: RelationType,
     dependent: usize,
 ) -> Option<DepTriple<&str>> {
     graph
         .edges_directed(node_index(dependent), Direction::Incoming)
-        .find(|e| e.weight().0 == proj)
+        .find(|e| e.weight().0 == relation_type)
         .map(|e| {
             DepTriple::new(
                 e.source().index(),

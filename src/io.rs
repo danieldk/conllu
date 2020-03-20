@@ -55,7 +55,6 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
         let mut line = String::new();
         let mut sentence = Sentence::new();
         let mut edges = Vec::new();
-        let mut proj_edges = Vec::new();
 
         loop {
             line.clear();
@@ -66,7 +65,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                     return Ok(None);
                 }
 
-                add_edges(&mut sentence, edges, proj_edges);
+                add_edges(&mut sentence, edges);
 
                 return Ok(Some(sentence));
             }
@@ -79,7 +78,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                     continue;
                 }
 
-                add_edges(&mut sentence, edges, proj_edges);
+                add_edges(&mut sentence, edges);
 
                 return Ok(Some(sentence));
             }
@@ -104,33 +103,14 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                 edges.push(DepTriple::new(head, head_rel, sentence.len()));
             }
 
-            // Projective head relation.
-            if let Some(proj_head) = parse_numeric_field(iter.next())? {
-                let proj_head_rel = parse_string_field(iter.next());
-                proj_edges.push(DepTriple::new(proj_head, proj_head_rel, sentence.len()));
-            }
-
-            //token.set_head();
-            //token.set_head_rel();
-            //token.set_p_head(parse_numeric_field(iter.next())?);
-            //token.set_p_head_rel(parse_string_field(iter.next()));
-
             sentence.push(token);
         }
     }
 }
 
-fn add_edges(
-    sentence: &mut Sentence,
-    edges: Vec<DepTriple<String>>,
-    proj_edges: Vec<DepTriple<String>>,
-) {
+fn add_edges(sentence: &mut Sentence, edges: Vec<DepTriple<String>>) {
     for edge in edges {
         sentence.dep_graph_mut().add_deprel(edge);
-    }
-
-    for edge in proj_edges {
-        sentence.proj_dep_graph_mut().add_deprel(edge);
     }
 }
 

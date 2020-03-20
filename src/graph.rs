@@ -213,7 +213,7 @@ impl Display for Sentence {
 
             writeln!(
                 fmt,
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t_\t_",
+                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                 i,
                 token.form(),
                 token.lemma().unwrap_or("_"),
@@ -225,6 +225,11 @@ impl Display for Sentence {
                     .unwrap_or_else(|| "_".to_string()),
                 head.unwrap_or_else(|| "_".to_string()),
                 head_rel.unwrap_or_else(|| "_".to_string()),
+                token.deps().unwrap_or("_"),
+                token
+                    .misc()
+                    .map(|m| m.join("|"))
+                    .unwrap_or_else(|| "_".to_owned())
             )?;
         }
 

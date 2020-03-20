@@ -103,6 +103,13 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                 edges.push(DepTriple::new(head, head_rel, sentence.len()));
             }
 
+            token.set_deps(parse_string_field(iter.next()));
+
+            token.set_misc(
+                parse_string_field(iter.next())
+                    .map(|s| s.split('|').map(ToOwned::to_owned).collect::<Vec<String>>()),
+            );
+
             sentence.push(token);
         }
     }

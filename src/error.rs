@@ -1,15 +1,15 @@
 use failure::Fail;
 
-/// CoNLL-U read errors.
+/// CoNLL-U parsing errors.
 #[derive(Debug, Eq, Fail, PartialEq)]
-pub enum ReadError {
+pub enum ParseError {
     /// The form is missing in the CoNLL-U data.
     #[fail(display = "form field is missing")]
     MissingFormField,
 
     /// The feature field could not be parsed
     #[fail(display = "cannot parse feature field: {}", value)]
-    ParseFeatureField { value: String },
+    IncorrectFeatureField { value: String },
 
     /// An integer field could not be parsed as an integer.
     #[fail(display = "cannot parse as integer field: {}", value)]

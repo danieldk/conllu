@@ -10,7 +10,7 @@ use std::ops::{Deref, DerefMut};
 
 use itertools::Itertools;
 
-use crate::error::ReadError;
+use crate::error::ParseError;
 
 pub const EMPTY_TOKEN: &str = "_";
 
@@ -240,11 +240,11 @@ impl Features {
         self.inner
     }
 
-    fn parse_features(feature_string: impl AsRef<str>) -> Result<Self, ReadError> {
+    fn parse_features(feature_string: impl AsRef<str>) -> Result<Self, ParseError> {
         let mut features = BTreeMap::new();
 
         for fv in feature_string.as_ref().split('|') {
-            let idx = fv.find('=').ok_or(ReadError::ParseFeatureField {
+            let idx = fv.find('=').ok_or(ParseError::IncorrectFeatureField {
                 value: fv.to_owned(),
             })?;
 
@@ -289,7 +289,7 @@ impl From<BTreeMap<String, String>> for Features {
 }
 
 impl TryFrom<&str> for Features {
-    type Error = ReadError;
+    type Error = ParseError;
 
     fn try_from(feature_string: &str) -> Result<Self, Self::Error> {
         Features::parse_features(feature_string)
@@ -337,7 +337,7 @@ mod tests {
     use quickcheck::quickcheck;
 
     use super::{Features, Token, TokenBuilder};
-    use crate::error::ReadError;
+    use crate::error::ParseError;
 
     quickcheck! {
         fn features_from_iter(feature_map: BTreeMap<String, String>) -> bool{
@@ -425,7 +425,7 @@ mod tests {
     fn feature_without_value_results_in_error() {
         assert_eq!(
             Features::try_from("c=d|a"),
-            Err(ReadError::ParseFeatureField {
+            Err(ParseError::IncorrectFeatureField {
                 value: "a".to_string()
             })
         );

@@ -1,5 +1,5 @@
 mod error;
-pub use crate::error::{GraphError, ReadError};
+pub use crate::error::{GraphError, ParseError};
 
 pub mod graph;
 

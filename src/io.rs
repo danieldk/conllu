@@ -5,7 +5,7 @@ use std::io;
 
 use failure::Error;
 
-use crate::error::ReadError;
+use crate::error::ParseError;
 use crate::graph::{DepTriple, Sentence};
 use crate::token::{Features, Token, EMPTY_TOKEN};
 
@@ -144,8 +144,8 @@ where
     }
 }
 
-fn parse_form_field(field: Option<&str>) -> Result<String, ReadError> {
-    field.map(str::to_owned).ok_or(ReadError::MissingFormField)
+fn parse_form_field(field: Option<&str>) -> Result<String, ParseError> {
+    field.map(str::to_owned).ok_or(ParseError::MissingFormField)
 }
 
 fn parse_string_field(field: Option<&str>) -> Option<String> {
@@ -158,20 +158,20 @@ fn parse_string_field(field: Option<&str>) -> Option<String> {
     })
 }
 
-fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>, ReadError> {
+fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>, ParseError> {
     match field {
-        None => Err(ReadError::ParseIdentifierField {
+        None => Err(ParseError::ParseIdentifierField {
             value: "A token identifier should be present".to_owned(),
         }),
         Some(s) => {
             if s == EMPTY_TOKEN {
-                return Err(ReadError::ParseIdentifierField {
+                return Err(ParseError::ParseIdentifierField {
                     value: s.to_owned(),
                 });
             }
 
             Ok(Some(s.parse::<usize>().map_err(|_| {
-                ReadError::ParseIntField {
+                ParseError::ParseIntField {
                     value: s.to_owned(),
                 }
             })?))
@@ -179,7 +179,7 @@ fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>, ReadErro
     }
 }
 
-fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, ReadError> {
+fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, ParseError> {
     match field {
         None => Ok(None),
         Some(s) => {
@@ -187,7 +187,7 @@ fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, ReadError> 
                 Ok(None)
             } else {
                 Ok(Some(s.parse::<usize>().map_err(|_| {
-                    ReadError::ParseIntField {
+                    ParseError::ParseIntField {
                         value: s.to_owned(),
                     }
                 })?))

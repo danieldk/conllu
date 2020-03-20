@@ -4,7 +4,7 @@ use std::io::BufReader;
 
 use lazy_static::lazy_static;
 
-use crate::graph::{DepTriple, Sentence};
+use crate::graph::{Comment, DepTriple, Sentence};
 use crate::io::{ReadSentence, Reader};
 use crate::token::{Features, TokenBuilder};
 
@@ -13,6 +13,12 @@ lazy_static! {
         let mut sentences = Vec::new();
 
         let mut s1 = Sentence::new();
+        s1.comments_mut().push(Comment::AttrVal {
+            attr: "sent_id".to_string(),
+            val: "1".to_string(),
+        });
+        s1.comments_mut()
+            .push(Comment::String("some random comment".to_string()));
         s1.push(
             TokenBuilder::new("Die")
                 .lemma("die")

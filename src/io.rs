@@ -6,7 +6,7 @@ use std::io;
 use failure::Error;
 
 use crate::error::ParseError;
-use crate::graph::{DepTriple, Sentence};
+use crate::graph::{Comment, DepTriple, Sentence};
 use crate::token::{Features, Token, EMPTY_TOKEN};
 
 /// A trait for objects that can read CoNLL-U `Sentence`s
@@ -83,6 +83,11 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                 return Ok(Some(sentence));
             }
 
+            if line.starts_with('#') {
+                sentence.comments_mut().push(parse_comment(&line[1..]));
+                continue;
+            }
+
             let mut iter = line.trim().split_terminator('\t');
 
             parse_identifier_field(iter.next())?;
@@ -141,6 +146,18 @@ where
             Ok(Some(sent)) => Some(Ok(sent)),
             Err(e) => Some(Err(e)),
         }
+    }
+}
+
+fn parse_comment(comment: &str) -> Comment {
+    let comment = comment.trim();
+
+    match comment.find(" = ") {
+        Some(idx) => Comment::AttrVal {
+            attr: comment[..idx].to_string(),
+            val: comment[idx + 3..].to_string(),
+        },
+        None => Comment::String(comment.to_string()),
     }
 }
 

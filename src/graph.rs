@@ -48,6 +48,56 @@ impl Node {
     }
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+/// Sentence comment.
+pub enum Comment {
+    /// Attribute-value pair
+    AttrVal { attr: String, val: String },
+
+    /// String comment
+    String(String),
+}
+
+impl Comment {
+    /// Returns `true` if the comment is an attribute-value pair.
+    pub fn is_attr_val(&self) -> bool {
+        !self.is_string()
+    }
+
+    /// Returns `true` if the comment is a string.
+    pub fn is_string(&self) -> bool {
+        match self {
+            Comment::String(_) => true,
+            Comment::AttrVal { .. } => false,
+        }
+    }
+
+    /// Get the comment attribute value pair.
+    pub fn attr_val(&self) -> Option<(&str, &str)> {
+        match self {
+            Comment::AttrVal { attr, val } => Some((attr, val)),
+            Comment::String(_) => None,
+        }
+    }
+
+    /// Get the comment string.
+    pub fn string(&self) -> Option<&str> {
+        match self {
+            Comment::AttrVal { .. } => None,
+            Comment::String(val) => Some(val),
+        }
+    }
+}
+
+impl Display for Comment {
+    fn fmt(&self, fmt: &mut Formatter) -> Result<(), fmt::Error> {
+        match self {
+            Comment::AttrVal { attr, val } => write!(fmt, "# {} = {}", attr, val),
+            Comment::String(val) => write!(fmt, "# {}", val),
+        }
+    }
+}
+
 /// A dependency triple.
 ///
 /// A dependency triple consists of: a head index; a dependent index; and
@@ -117,7 +167,10 @@ pub type Edge = (RelationType, Option<String>);
 /// single-headedness. The `into_inner`/`get_ref` methods can
 /// be used to unwrap or get a reference to the wrapped graph.
 #[derive(Clone, Debug)]
-pub struct Sentence(DiGraph<Node, Edge>);
+pub struct Sentence {
+    comments: Vec<Comment>,
+    graph: DiGraph<Node, Edge>,
+}
 
 #[allow(clippy::len_without_is_empty)]
 impl Sentence {
@@ -133,32 +186,43 @@ impl Sentence {
     /// assert_eq!(sentence[0], Node::Root);
     /// ```
     pub fn new() -> Self {
-        let mut g = DiGraph::new();
-        g.add_node(Node::Root);
-        Sentence(g)
+        let mut graph = DiGraph::new();
+        graph.add_node(Node::Root);
+        Sentence {
+            comments: Vec::new(),
+            graph,
+        }
+    }
+
+    pub fn comments(&self) -> &[Comment] {
+        &self.comments
+    }
+
+    pub fn comments_mut(&mut self) -> &mut Vec<Comment> {
+        &mut self.comments
     }
 
     /// Get a reference to the `DiGraph` of the sentence.
     pub fn get_ref(&self) -> &DiGraph<Node, Edge> {
-        &self.0
+        &self.graph
     }
 
     /// Unwrap the `DiGraph` of the sentence.
     pub fn into_inner(self) -> DiGraph<Node, Edge> {
-        self.0
+        self.graph
     }
 
     /// Get an iterator over the nodes in the graph.
     pub fn iter(&self) -> Iter {
         Iter {
-            inner: self.0.node_indices(),
-            graph: &self.0,
+            inner: self.graph.node_indices(),
+            graph: &self.graph,
         }
     }
 
     /// Get a mutable iterator over the nodes in the graph.
     pub fn iter_mut(&mut self) -> IterMut {
-        IterMut(self.0.node_weights_mut())
+        IterMut(self.graph.node_weights_mut())
     }
 
     /// Add a new token to the graph.
@@ -168,13 +232,13 @@ impl Sentence {
     /// Returns the index of the token. The first pushed token has index 1,
     /// since index 0 is reserved by the root of the graph.
     pub fn push(&mut self, token: Token) -> usize {
-        self.0.add_node(Node::Token(token)).index()
+        self.graph.add_node(Node::Token(token)).index()
     }
 
     /// Get the dependency graph.
     pub fn dep_graph(&self) -> DepGraph {
         DepGraph {
-            inner: &self.0,
+            inner: &self.graph,
             relation_type: RelationType::Regular,
         }
     }
@@ -182,7 +246,7 @@ impl Sentence {
     /// Get the graph mutably.
     pub fn dep_graph_mut(&mut self) -> DepGraphMut {
         DepGraphMut {
-            inner: &mut self.0,
+            inner: &mut self.graph,
             relation_type: RelationType::Regular,
         }
     }
@@ -191,7 +255,7 @@ impl Sentence {
     ///
     /// This is equal to the number of tokens, plus one root node.
     pub fn len(&self) -> usize {
-        self.0.node_count()
+        self.graph.node_count()
     }
 }
 
@@ -203,6 +267,10 @@ impl Default for Sentence {
 
 impl Display for Sentence {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), fmt::Error> {
+        for comment in self.comments() {
+            writeln!(fmt, "{}", comment)?
+        }
+
         for i in 1..self.len() {
             let token = match self[i] {
                 Node::Token(ref token) => token,
@@ -322,19 +390,19 @@ impl Index<usize> for Sentence {
     type Output = Node;
 
     fn index(&self, idx: usize) -> &Self::Output {
-        &self.0[node_index(idx)]
+        &self.graph[node_index(idx)]
     }
 }
 
 impl IndexMut<usize> for Sentence {
     fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
-        &mut self.0[node_index(idx)]
+        &mut self.graph[node_index(idx)]
     }
 }
 
 impl PartialEq for Sentence {
     fn eq(&self, other: &Self) -> bool {
-        self.dep_graph() == other.dep_graph()
+        self.comments == other.comments && self.dep_graph() == other.dep_graph()
     }
 }
 

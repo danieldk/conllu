@@ -3,6 +3,7 @@
 use std::borrow::Borrow;
 use std::fmt::{self, Display, Formatter};
 use std::iter::FromIterator;
+use std::mem;
 use std::ops::{Index, IndexMut};
 
 use petgraph::graph::{node_index, DiGraph, NodeIndices, NodeWeightsMut};
@@ -256,6 +257,13 @@ impl Sentence {
     /// This is equal to the number of tokens, plus one root node.
     pub fn len(&self) -> usize {
         self.graph.node_count()
+    }
+
+    /// Replace the comments by the given comments.
+    ///
+    /// Returns the old comments that are replaced.
+    pub fn set_comments(&mut self, comments: impl Into<Vec<Comment>>) {
+        mem::replace(&mut self.comments, comments.into());
     }
 }
 

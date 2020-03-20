@@ -39,8 +39,6 @@ lazy_static! {
             .add_deprel(DepTriple::new(2, Some("DET"), 1));
         s1.dep_graph_mut()
             .add_deprel(DepTriple::new(0, Some("ROOT"), 2));
-        s1.proj_dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("TEST"), 1));
 
         sentences.push(s1);
 

@@ -60,6 +60,18 @@ impl TokenBuilder {
         self.token.set_features(Some(features));
         self
     }
+
+    #[allow(dead_code)]
+    pub(crate) fn deps(mut self, deps: impl Into<String>) -> TokenBuilder {
+        self.token.set_deps(Some(deps.into()));
+        self
+    }
+
+    /// Set the additional information associated with the token.
+    pub fn misc(mut self, misc: Vec<String>) -> TokenBuilder {
+        self.token.set_misc(Some(misc));
+        self
+    }
 }
 
 impl From<Token> for TokenBuilder {
@@ -81,6 +93,11 @@ pub struct Token {
     upos: Option<String>,
     xpos: Option<String>,
     features: Option<Features>,
+    misc: Option<Vec<String>>,
+
+    // Currently not exposed, but stored to preserve existing
+    // field on read -> write round trips.
+    deps: Option<String>,
 }
 
 impl Token {
@@ -92,6 +109,8 @@ impl Token {
             upos: None,
             xpos: None,
             features: None,
+            misc: None,
+            deps: None,
         }
     }
 
@@ -125,6 +144,22 @@ impl Token {
     /// Returns a mutable reference, so that the features can be updated.
     pub fn features_mut(&mut self) -> Option<&mut Features> {
         self.features.as_mut()
+    }
+
+    pub(crate) fn deps(&self) -> Option<&str> {
+        self.deps.as_deref()
+    }
+
+    /// Get the additional information associated with the token.
+    pub fn misc(&self) -> Option<&[String]> {
+        self.misc.as_deref()
+    }
+
+    /// Get the additional information associated with the token.
+    ///
+    /// Returns a mutable reference, so that the information can be updated.
+    pub fn misc_mut(&mut self) -> Option<&mut Vec<String>> {
+        self.misc.as_mut()
     }
 
     /// Set the word form or punctuation symbol.
@@ -169,6 +204,17 @@ impl Token {
     /// Returns the features that are replaced.
     pub fn set_features(&mut self, features: Option<Features>) -> Option<Features> {
         mem::replace(&mut self.features, features)
+    }
+
+    pub(crate) fn set_deps(&mut self, deps: Option<impl Into<String>>) -> Option<String> {
+        mem::replace(&mut self.deps, deps.map(Into::into))
+    }
+
+    /// Set the additional information associated with the token.
+    ///
+    /// Returns the information that is replaced.
+    pub fn set_misc(&mut self, misc: Option<impl Into<Vec<String>>>) -> Option<Vec<String>> {
+        mem::replace(&mut self.misc, misc.map(Into::into))
     }
 }
 

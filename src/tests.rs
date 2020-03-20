@@ -21,6 +21,8 @@ lazy_static! {
                 .features(
                     Features::try_from("case=nominative|gender=feminine|number=singular").unwrap(),
                 )
+                .deps("2:det")
+                .misc(vec!["misc1".to_string(), "misc2".to_string()])
                 .into(),
         );
 

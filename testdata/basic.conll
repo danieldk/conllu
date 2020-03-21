@@ -1,6 +1,6 @@
 # sent_id = 1
 # some random comment
-1	Die	die	ART	ART	case=nominative|gender=feminine|number=singular	2	DET	2:det	misc1|misc2
+1	Die	die	ART	ART	case=nominative|gender=feminine|number=singular	2	DET	2:det	misc1|misc2=value
 2	Großaufnahme	Großaufnahme	N	NN	case=nominative|gender=feminine|number=singular	0	ROOT
 
 1	Gilles	Gilles	N	NE	case=nominative|gender=masculine|number=singular	0	ROOT

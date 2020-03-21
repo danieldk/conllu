@@ -67,8 +67,8 @@ impl TokenBuilder {
         self
     }
 
-    /// Set the additional information associated with the token.
-    pub fn misc(mut self, misc: Vec<String>) -> TokenBuilder {
+    /// Set miscellaneous token features.
+    pub fn misc(mut self, misc: Misc) -> TokenBuilder {
         self.token.set_misc(Some(misc));
         self
     }
@@ -93,7 +93,7 @@ pub struct Token {
     upos: Option<String>,
     xpos: Option<String>,
     features: Option<Features>,
-    misc: Option<Vec<String>>,
+    misc: Option<Misc>,
 
     // Currently not exposed, but stored to preserve existing
     // field on read -> write round trips.
@@ -150,15 +150,15 @@ impl Token {
         self.deps.as_deref()
     }
 
-    /// Get the additional information associated with the token.
-    pub fn misc(&self) -> Option<&[String]> {
-        self.misc.as_deref()
+    /// Get miscellaneous token features.
+    pub fn misc(&self) -> Option<&Misc> {
+        self.misc.as_ref()
     }
 
-    /// Get the additional information associated with the token.
+    /// Get miscellaneous token features.
     ///
     /// Returns a mutable reference, so that the information can be updated.
-    pub fn misc_mut(&mut self) -> Option<&mut Vec<String>> {
+    pub fn misc_mut(&mut self) -> Option<&mut Misc> {
         self.misc.as_mut()
     }
 
@@ -210,11 +210,11 @@ impl Token {
         mem::replace(&mut self.deps, deps.map(Into::into))
     }
 
-    /// Set the additional information associated with the token.
+    /// Set miscellaneous token features.
     ///
-    /// Returns the information that is replaced.
-    pub fn set_misc(&mut self, misc: Option<impl Into<Vec<String>>>) -> Option<Vec<String>> {
-        mem::replace(&mut self.misc, misc.map(Into::into))
+    /// Returns the features that are replaced.
+    pub fn set_misc(&mut self, misc: Option<Misc>) -> Option<Misc> {
+        mem::replace(&mut self.misc, misc)
     }
 }
 
@@ -323,6 +323,116 @@ impl From<&Features> for String {
             .inner
             .iter()
             .map(|(k, v)| format!("{}={}", k, v))
+            .join("|")
+    }
+}
+
+/// Miscellaneous features.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Misc {
+    inner: BTreeMap<String, Option<String>>,
+}
+
+impl Misc {
+    /// Construct an empty set of features.
+    pub fn new() -> Self {
+        Misc {
+            inner: BTreeMap::new(),
+        }
+    }
+
+    /// Unwrap the contained feature map.
+    pub fn into_inner(self) -> BTreeMap<String, Option<String>> {
+        self.inner
+    }
+
+    fn parse_features(misc_string: impl AsRef<str>) -> BTreeMap<String, Option<String>> {
+        let mut features = BTreeMap::new();
+
+        for fv in misc_string.as_ref().split('|') {
+            let fv: &str = fv;
+            let (k, v) = fv
+                .find('=')
+                .map(|idx| (fv[..idx].to_owned(), Some(fv[idx + 1..].to_owned())))
+                .unwrap_or_else(|| (fv.to_owned(), None));
+            features.insert(k, v);
+        }
+
+        features
+    }
+}
+
+impl Default for Misc {
+    fn default() -> Self {
+        Misc::new()
+    }
+}
+
+impl Deref for Misc {
+    type Target = BTreeMap<String, Option<String>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl DerefMut for Misc {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+
+impl Display for Misc {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let misc_str: String = self.into();
+        f.write_str(&misc_str)
+    }
+}
+
+impl From<BTreeMap<String, Option<String>>> for Misc {
+    fn from(misc_map: BTreeMap<String, Option<String>>) -> Self {
+        Misc { inner: misc_map }
+    }
+}
+
+impl From<&str> for Misc {
+    fn from(misc_string: &str) -> Self {
+        Misc {
+            inner: Misc::parse_features(misc_string),
+        }
+    }
+}
+
+impl<S, T> FromIterator<(S, Option<T>)> for Misc
+where
+    S: Into<String>,
+    T: Into<String>,
+{
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = (S, Option<T>)>,
+    {
+        let misc =
+            BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
+
+        Misc { inner: misc }
+    }
+}
+
+impl From<Misc> for String {
+    fn from(misc: Misc) -> Self {
+        (&misc).into()
+    }
+}
+
+impl From<&Misc> for String {
+    fn from(misc: &Misc) -> Self {
+        misc.inner
+            .iter()
+            .map(|(k, v)| match *v {
+                Some(ref v) => format!("{}={}", k, v),
+                None => k.to_owned(),
+            })
             .join("|")
     }
 }

@@ -304,7 +304,7 @@ impl Display for Sentence {
                 token.deps().unwrap_or("_"),
                 token
                     .misc()
-                    .map(|m| m.join("|"))
+                    .map(Into::into)
                     .unwrap_or_else(|| "_".to_owned())
             )?;
         }

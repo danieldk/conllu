@@ -1,12 +1,13 @@
 use std::convert::TryFrom;
 use std::fs::File;
 use std::io::BufReader;
+use std::iter::FromIterator;
 
 use lazy_static::lazy_static;
 
 use crate::graph::{Comment, DepTriple, Sentence};
 use crate::io::{ReadSentence, Reader};
-use crate::token::{Features, TokenBuilder};
+use crate::token::{Features, Misc, TokenBuilder};
 
 lazy_static! {
     pub static ref TEST_SENTENCES: Vec<Sentence> = {
@@ -28,7 +29,10 @@ lazy_static! {
                     Features::try_from("case=nominative|gender=feminine|number=singular").unwrap(),
                 )
                 .deps("2:det")
-                .misc(vec!["misc1".to_string(), "misc2".to_string()])
+                .misc(Misc::from_iter(vec![
+                    ("misc1", None),
+                    ("misc2", Some("value")),
+                ]))
                 .into(),
         );
 

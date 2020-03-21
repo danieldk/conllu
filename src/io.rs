@@ -7,7 +7,7 @@ use failure::Error;
 
 use crate::error::ParseError;
 use crate::graph::{Comment, DepTriple, Sentence};
-use crate::token::{Features, Token, EMPTY_TOKEN};
+use crate::token::{Features, Misc, Token, EMPTY_TOKEN};
 
 /// A trait for objects that can read CoNLL-U `Sentence`s
 pub trait ReadSentence {
@@ -110,10 +110,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
             token.set_deps(parse_string_field(iter.next()));
 
-            token.set_misc(
-                parse_string_field(iter.next())
-                    .map(|s| s.split('|').map(ToOwned::to_owned).collect::<Vec<String>>()),
-            );
+            token.set_misc(parse_string_field(iter.next()).map(|s| Misc::from(s.as_str())));
 
             sentence.push(token);
         }

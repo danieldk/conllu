@@ -295,17 +295,11 @@ impl Display for Sentence {
                 token.lemma().unwrap_or("_"),
                 token.upos().unwrap_or("_"),
                 token.xpos().unwrap_or("_"),
-                token
-                    .features()
-                    .map(Into::into)
-                    .unwrap_or_else(|| "_".to_string()),
+                String::from(token.features()),
                 head.unwrap_or_else(|| "_".to_string()),
                 head_rel.unwrap_or_else(|| "_".to_string()),
                 token.deps().unwrap_or("_"),
-                token
-                    .misc()
-                    .map(Into::into)
-                    .unwrap_or_else(|| "_".to_owned())
+                String::from(token.misc())
             )?;
         }
 

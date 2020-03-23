@@ -7,7 +7,7 @@ use lazy_static::lazy_static;
 
 use crate::graph::{Comment, DepTriple, Sentence};
 use crate::io::{ReadSentence, Reader};
-use crate::token::{Features, Misc, TokenBuilder};
+use crate::token::{Features, Misc, Token, TokenBuilder};
 
 lazy_static! {
     pub static ref TEST_SENTENCES: Vec<Sentence> = {
@@ -80,6 +80,12 @@ lazy_static! {
         s2.dep_graph_mut()
             .add_deprel(DepTriple::new(1, Some("APP"), 2));
         sentences.push(s2);
+
+        let mut s3 = Sentence::new();
+        s3.push(Token::new("Plain"));
+        s3.push(Token::new("and"));
+        s3.push(Token::new("simple"));
+        sentences.push(s3);
 
         sentences
     };

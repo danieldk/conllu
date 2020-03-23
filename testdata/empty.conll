@@ -5,3 +5,7 @@
 
 1	Gilles	Gilles	N	NE	case=nominative|gender=masculine|number=singular	0	ROOT	_	_
 2	Deleuze	Deleuze	N	NE	case=nominative|gender=masculine|number=singular	1	APP	_	_
+
+1	Plain	_	_	_	_	_	_	_	_
+2	and	_	_	_	_	_	_	_	_
+3	simple	_	_	_	_	_	_	_	_

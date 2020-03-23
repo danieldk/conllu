@@ -99,7 +99,8 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             token.set_features(
                 parse_string_field(iter.next())
                     .map(|s| Features::try_from(s.as_str()))
-                    .transpose()?,
+                    .transpose()?
+                    .unwrap_or_else(Features::new),
             );
 
             // Head relation.
@@ -110,7 +111,11 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
             token.set_deps(parse_string_field(iter.next()));
 
-            token.set_misc(parse_string_field(iter.next()).map(|s| Misc::from(s.as_str())));
+            token.set_misc(
+                parse_string_field(iter.next())
+                    .map(|s| Misc::from(s.as_str()))
+                    .unwrap_or_else(Misc::new),
+            );
 
             sentence.push(token);
         }

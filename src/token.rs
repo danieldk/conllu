@@ -57,7 +57,7 @@ impl TokenBuilder {
 
     /// Set the syntactic and/or morphological features of the token.
     pub fn features(mut self, features: Features) -> TokenBuilder {
-        self.token.set_features(Some(features));
+        self.token.set_features(features);
         self
     }
 
@@ -69,7 +69,7 @@ impl TokenBuilder {
 
     /// Set miscellaneous token features.
     pub fn misc(mut self, misc: Misc) -> TokenBuilder {
-        self.token.set_misc(Some(misc));
+        self.token.set_misc(misc);
         self
     }
 }
@@ -92,8 +92,8 @@ pub struct Token {
     lemma: Option<String>,
     upos: Option<String>,
     xpos: Option<String>,
-    features: Option<Features>,
-    misc: Option<Misc>,
+    features: Features,
+    misc: Misc,
 
     // Currently not exposed, but stored to preserve existing
     // field on read -> write round trips.
@@ -108,8 +108,8 @@ impl Token {
             lemma: None,
             upos: None,
             xpos: None,
-            features: None,
-            misc: None,
+            features: Features::new(),
+            misc: Misc::new(),
             deps: None,
         }
     }
@@ -135,15 +135,15 @@ impl Token {
     }
 
     /// Get the syntactic and/or morphological features of the token.
-    pub fn features(&self) -> Option<&Features> {
-        self.features.as_ref()
+    pub fn features(&self) -> &Features {
+        &self.features
     }
 
     /// Get the syntactic and/or morphological features of the token.
     ///
     /// Returns a mutable reference, so that the features can be updated.
-    pub fn features_mut(&mut self) -> Option<&mut Features> {
-        self.features.as_mut()
+    pub fn features_mut(&mut self) -> &mut Features {
+        &mut self.features
     }
 
     pub(crate) fn deps(&self) -> Option<&str> {
@@ -151,15 +151,15 @@ impl Token {
     }
 
     /// Get miscellaneous token features.
-    pub fn misc(&self) -> Option<&Misc> {
-        self.misc.as_ref()
+    pub fn misc(&self) -> &Misc {
+        &self.misc
     }
 
     /// Get miscellaneous token features.
     ///
     /// Returns a mutable reference, so that the information can be updated.
-    pub fn misc_mut(&mut self) -> Option<&mut Misc> {
-        self.misc.as_mut()
+    pub fn misc_mut(&mut self) -> &mut Misc {
+        &mut self.misc
     }
 
     /// Set the word form or punctuation symbol.
@@ -202,7 +202,7 @@ impl Token {
     /// Set the syntactic and/or morphological features of the token.
     ///
     /// Returns the features that are replaced.
-    pub fn set_features(&mut self, features: Option<Features>) -> Option<Features> {
+    pub fn set_features(&mut self, features: Features) -> Features {
         mem::replace(&mut self.features, features)
     }
 
@@ -213,7 +213,7 @@ impl Token {
     /// Set miscellaneous token features.
     ///
     /// Returns the features that are replaced.
-    pub fn set_misc(&mut self, misc: Option<Misc>) -> Option<Misc> {
+    pub fn set_misc(&mut self, misc: Misc) -> Misc {
         mem::replace(&mut self.misc, misc)
     }
 }
@@ -242,6 +242,12 @@ impl Features {
 
     fn parse_features(feature_string: impl AsRef<str>) -> Result<Self, ParseError> {
         let mut features = BTreeMap::new();
+
+        if feature_string.as_ref() == "_" {
+            return Ok(Features {
+                inner: BTreeMap::new(),
+            });
+        }
 
         for fv in feature_string.as_ref().split('|') {
             let idx = fv.find('=').ok_or(ParseError::IncorrectFeatureField {
@@ -319,11 +325,15 @@ impl From<Features> for String {
 
 impl From<&Features> for String {
     fn from(features: &Features) -> Self {
-        features
-            .inner
-            .iter()
-            .map(|(k, v)| format!("{}={}", k, v))
-            .join("|")
+        if features.is_empty() {
+            "_".to_string()
+        } else {
+            features
+                .inner
+                .iter()
+                .map(|(k, v)| format!("{}={}", k, v))
+                .join("|")
+        }
     }
 }
 
@@ -427,13 +437,17 @@ impl From<Misc> for String {
 
 impl From<&Misc> for String {
     fn from(misc: &Misc) -> Self {
-        misc.inner
-            .iter()
-            .map(|(k, v)| match *v {
-                Some(ref v) => format!("{}={}", k, v),
-                None => k.to_owned(),
-            })
-            .join("|")
+        if misc.is_empty() {
+            "_".to_string()
+        } else {
+            misc.inner
+                .iter()
+                .map(|(k, v)| match *v {
+                    Some(ref v) => format!("{}={}", k, v),
+                    None => k.to_owned(),
+                })
+                .join("|")
+        }
     }
 }
 
@@ -466,6 +480,8 @@ mod tests {
         let features_string: String = features.into();
 
         assert_eq!(features_string, "feature1=x|feature2=y");
+
+        assert_eq!(String::from(Features::new()), "_");
     }
 
     #[test]
@@ -484,7 +500,7 @@ mod tests {
         let features = features_correct();
 
         for (token, correct) in tokens.iter().zip(features) {
-            let kv = &**token.features().unwrap();
+            let kv = &**token.features();
             assert_eq!(&correct, kv);
         }
     }
@@ -539,5 +555,10 @@ mod tests {
                 value: "a".to_string()
             })
         );
+    }
+
+    #[test]
+    fn parse_empty_features() {
+        assert_eq!(Features::try_from("_").unwrap(), Features::new());
     }
 }

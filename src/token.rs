@@ -11,6 +11,7 @@ use std::ops::{Deref, DerefMut};
 use itertools::Itertools;
 
 use crate::error::ParseError;
+use crate::graph::{Iter, IterMut, Node, Sentence};
 
 pub const EMPTY_TOKEN: &str = "_";
 
@@ -451,6 +452,65 @@ impl From<&Misc> for String {
     }
 }
 
+/// Get tokens of a sentence.
+pub trait Tokens {
+    /// Get an iterator over the tokens in a sentence.
+    fn tokens(&self) -> TokenIter;
+
+    /// Get the tokens in a sentence mutably.
+    fn tokens_mut(&mut self) -> TokenIterMut;
+}
+
+impl Tokens for Sentence {
+    fn tokens(&self) -> TokenIter {
+        TokenIter { inner: self.iter() }
+    }
+
+    fn tokens_mut(&mut self) -> TokenIterMut {
+        TokenIterMut {
+            inner: self.iter_mut(),
+        }
+    }
+}
+
+/// Token iterator.
+pub struct TokenIter<'a> {
+    inner: Iter<'a>,
+}
+
+impl<'a> Iterator for TokenIter<'a> {
+    type Item = &'a Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(node) = self.inner.next() {
+            if let Node::Token(token) = node {
+                return Some(token);
+            }
+        }
+
+        None
+    }
+}
+
+/// Mutable token iterator.
+pub struct TokenIterMut<'a> {
+    inner: IterMut<'a>,
+}
+
+impl<'a> Iterator for TokenIterMut<'a> {
+    type Item = &'a mut Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(node) = self.inner.next() {
+            if let Node::Token(token) = node {
+                return Some(token);
+            }
+        }
+
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
@@ -460,8 +520,9 @@ mod tests {
     use maplit::btreemap;
     use quickcheck::quickcheck;
 
-    use super::{Features, Token, TokenBuilder};
+    use super::{Features, Token, TokenBuilder, Tokens};
     use crate::error::ParseError;
+    use crate::tests::TEST_SENTENCES;
 
     quickcheck! {
         fn features_from_iter(feature_map: BTreeMap<String, String>) -> bool{
@@ -560,5 +621,29 @@ mod tests {
     #[test]
     fn parse_empty_features() {
         assert_eq!(Features::try_from("_").unwrap(), Features::new());
+    }
+
+    #[test]
+    fn tokens() {
+        let mut iter = TEST_SENTENCES[0].tokens();
+        assert_eq!(iter.next(), TEST_SENTENCES[0][1].token());
+        assert_eq!(iter.next(), TEST_SENTENCES[0][2].token());
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn tokens_mut() {
+        let mut sentence = TEST_SENTENCES[0].clone();
+
+        {
+            let mut iter = sentence.tokens_mut();
+            let token = iter.next().unwrap();
+            assert_eq!(&*token, TEST_SENTENCES[0][1].token().unwrap());
+            token.set_upos(Some("mutable"));
+            assert_eq!(iter.next().map(|t| &*t), TEST_SENTENCES[0][2].token());
+            assert_eq!(iter.next(), None);
+        }
+
+        assert_eq!(sentence[1].token().unwrap().upos(), Some("mutable"));
     }
 }

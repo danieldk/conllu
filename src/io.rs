@@ -3,9 +3,7 @@
 use std::convert::TryFrom;
 use std::io;
 
-use failure::Error;
-
-use crate::error::ParseError;
+use crate::error::{IOError, ParseError};
 use crate::graph::{Comment, DepTriple, Sentence};
 use crate::token::{Features, Misc, Token, EMPTY_TOKEN};
 
@@ -17,7 +15,7 @@ pub trait ReadSentence {
     ///
     /// A call to `read_sentence` may generate an error to indicate that
     /// the operation could not be completed.
-    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error>;
+    fn read_sentence(&mut self) -> Result<Option<Sentence>, IOError>;
 
     /// Get an iterator over the sentences in this reader.
     fn sentences(self) -> Sentences<Self>
@@ -42,7 +40,7 @@ impl<R: io::BufRead> Reader<R> {
 }
 
 impl<R: io::BufRead> IntoIterator for Reader<R> {
-    type Item = Result<Sentence, Error>;
+    type Item = Result<Sentence, IOError>;
     type IntoIter = Sentences<Reader<R>>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -51,7 +49,7 @@ impl<R: io::BufRead> IntoIterator for Reader<R> {
 }
 
 impl<R: io::BufRead> ReadSentence for Reader<R> {
-    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error> {
+    fn read_sentence(&mut self) -> Result<Option<Sentence>, IOError> {
         let mut line = String::new();
         let mut sentence = Sentence::new();
         let mut edges = Vec::new();
@@ -140,7 +138,7 @@ impl<R> Iterator for Sentences<R>
 where
     R: ReadSentence,
 {
-    type Item = Result<Sentence, Error>;
+    type Item = Result<Sentence, IOError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.reader.read_sentence() {
@@ -223,7 +221,7 @@ pub trait WriteSentence {
     ///
     /// A call to `write_sentence` may generate an error to indicate that
     /// the operation could not be completed.
-    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error>;
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), IOError>;
 }
 
 /// A writer for CoNLL-U sentences.
@@ -270,7 +268,7 @@ impl<W: io::Write> Writer<W> {
 }
 
 impl<W: io::Write> WriteSentence for Writer<W> {
-    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error> {
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), IOError> {
         if self.first {
             self.first = false;
             write!(self.write, "{}", sentence)?
@@ -315,7 +313,7 @@ impl<W> WriteSentence for PartitioningWriter<W>
 where
     W: WriteSentence,
 {
-    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error> {
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), IOError> {
         if self.fold == self.writers.len() {
             self.fold = 0
         }
@@ -333,9 +331,8 @@ mod tests {
     use std::io::{BufRead, Cursor, Read};
     use std::str;
 
-    use failure::Error;
-
     use super::{ReadSentence, WriteSentence, Writer};
+    use crate::error::IOError;
     use crate::graph::Sentence;
     use crate::tests::{read_sentences, TEST_SENTENCES};
 
@@ -345,7 +342,7 @@ mod tests {
 
     static EMPTY: &str = "testdata/empty.conll";
 
-    fn read_file(filename: &str) -> Result<String, Error> {
+    fn read_file(filename: &str) -> Result<String, IOError> {
         let mut f = File::open(filename)?;
         let mut contents = String::new();
         f.read_to_string(&mut contents)?;

@@ -15,8 +15,8 @@ exclude = [
 ]
 
 [dependencies]
-itertools = "0.8"
-petgraph = "0.4"
+itertools = "0.9"
+petgraph = "0.5"
 thiserror = "1"
 
 [dev-dependencies]

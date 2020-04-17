@@ -105,6 +105,9 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             if let Some(head) = parse_numeric_field(iter.next())? {
                 let head_rel = parse_string_field(iter.next());
                 edges.push(DepTriple::new(head, head_rel, sentence.len()));
+            } else {
+                // Skip the head releation if we don't have a dependency relation field.
+                iter.next();
             }
 
             token.set_deps(parse_string_field(iter.next()));

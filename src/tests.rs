@@ -63,6 +63,7 @@ lazy_static! {
                 .features(
                     Features::try_from("case=nominative|gender=masculine|number=singular").unwrap(),
                 )
+                .misc(Misc::from("NE=per"))
                 .into(),
         );
         s2.push(
@@ -73,6 +74,7 @@ lazy_static! {
                 .features(
                     Features::try_from("case=nominative|gender=masculine|number=singular").unwrap(),
                 )
+                .misc(Misc::from("NE=per"))
                 .into(),
         );
         s2.dep_graph_mut()
@@ -86,6 +88,15 @@ lazy_static! {
         s3.push(Token::new("and"));
         s3.push(Token::new("simple"));
         sentences.push(s3);
+
+        let mut s4 = Sentence::new();
+        s4.push(
+            TokenBuilder::new("Amsterdam")
+                .misc(Misc::from("NE=loc"))
+                .into(),
+        );
+        eprintln!("{:?}", s4);
+        sentences.push(s4);
 
         sentences
     };

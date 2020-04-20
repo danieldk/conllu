@@ -107,7 +107,12 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                 edges.push(DepTriple::new(head, head_rel, sentence.len()));
             } else {
                 // Skip the head releation if we don't have a dependency relation field.
-                iter.next();
+                if parse_string_field(iter.next()).is_some() {
+                    return Err(ParseError::RelationWithoutHead {
+                        token: line.trim().to_owned(),
+                    }
+                    .into());
+                }
             }
 
             token.set_deps(parse_string_field(iter.next()));
@@ -387,6 +392,13 @@ mod tests {
     #[should_panic(expected = "ParseIdentifierField")]
     fn reader_rejects_underscore_id() {
         let mut reader = super::Reader::new(string_reader("_"));
+        reader.read_sentence().unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "RelationWithoutHead")]
+    fn reader_rejects_relation_without_head() {
+        let mut reader = super::Reader::new(string_reader("1\ttest\t_\t_\t_\t_\t_\troot"));
         reader.read_sentence().unwrap();
     }
 

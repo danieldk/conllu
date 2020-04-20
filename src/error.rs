@@ -31,6 +31,10 @@ pub enum ParseError {
     /// The identifier field could not be parsed.
     #[error("cannot parse as identifier field: {value:?})")]
     ParseIdentifierField { value: String },
+
+    /// Dependency relation without a head.
+    #[error("dependency relation without a head: {token:?}")]
+    RelationWithoutHead { token: String },
 }
 
 /// Graph errors.

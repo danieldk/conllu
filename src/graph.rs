@@ -263,7 +263,7 @@ impl Sentence {
     ///
     /// Returns the old comments that are replaced.
     pub fn set_comments(&mut self, comments: impl Into<Vec<Comment>>) {
-        mem::replace(&mut self.comments, comments.into());
+        let _ = mem::replace(&mut self.comments, comments.into());
     }
 }
 

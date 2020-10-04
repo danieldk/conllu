@@ -16,7 +16,7 @@ exclude = [
 
 [dependencies]
 itertools = "0.9"
-petgraph = "0.5"
+petgraph = { version = "0.5", default-features = false }
 thiserror = "1"
 
 [dev-dependencies]

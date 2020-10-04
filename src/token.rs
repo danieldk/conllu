@@ -518,16 +518,19 @@ mod tests {
     use std::iter::FromIterator;
 
     use maplit::btreemap;
-    use quickcheck::quickcheck;
 
     use super::{Features, Token, TokenBuilder, Tokens};
     use crate::error::ParseError;
     use crate::tests::TEST_SENTENCES;
 
-    quickcheck! {
-        fn features_from_iter(feature_map: BTreeMap<String, String>) -> bool{
-            feature_map == *Features::from_iter(feature_map.clone())
-        }
+    #[test]
+    fn features_from_iter() {
+        let feature_map = btreemap! {
+            "feature2".to_string() => "y".to_string(),
+            "feature1".to_string() => "x".to_string(),
+        };
+
+        assert_eq!(feature_map, *Features::from_iter(feature_map.clone()));
     }
 
     #[test]

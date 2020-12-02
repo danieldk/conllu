@@ -21,15 +21,12 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust: [stable, 1.40.0]
     steps:
     - uses: actions/checkout@v1
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
-        toolchain: ${{ matrix.rust }}
+        toolchain: stable
         override: true
     - uses: actions-rs/cargo@v1
       with:

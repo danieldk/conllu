@@ -7,8 +7,8 @@ use itertools::Itertools;
 use petgraph::graph::{node_index, EdgeIndex, NodeIndex};
 use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
 use petgraph::{Directed, Direction, Graph};
+use udgraph::graph::{DepTriple, Sentence};
 
-use crate::graph::{DepTriple, Sentence};
 use crate::{BfsWithDepth, GraphError};
 
 pub trait Deprojectivize {
@@ -325,8 +325,8 @@ fn update_sentence(graph: &Graph<(), String, Directed>, sentence: &mut Sentence)
 mod tests {
     use lazy_static::lazy_static;
     use petgraph::graph::{node_index, NodeIndex};
+    use udgraph::graph::Sentence;
 
-    use crate::graph::Sentence;
     use crate::proj::{
         non_projective_edges, simplify_graph, Deprojectivize, HeadProjectivizer, Projectivize,
     };

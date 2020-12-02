@@ -1,0 +1,20 @@
+[package]
+name = "udgraph-projectivize"
+version = "0.6.0"
+edition = "2018"
+authors = ["Daniël de Kok <me@danieldk.eu>"]
+description = "Projectivization/deprojectivization for universal dependency graphs"
+documentation = "https://docs.rs/udgraph/"
+homepage = "https://github.com/danieldk/udgraph"
+repository = "https://github.com/danieldk/udgraph"
+license = "Apache-2.0"
+
+[dependencies]
+itertools = "0.9"
+petgraph = { version = "0.5", default-features = false }
+thiserror = "1"
+udgraph = { path = "../udgraph", version = "0.6" }
+
+[dev-dependencies]
+conllu = { path = "../conllu", version = "0.6" }
+lazy_static = "1"

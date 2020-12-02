@@ -1,13 +1,13 @@
-use std::convert::TryFrom;
 use std::fs::File;
 use std::io::BufReader;
 use std::iter::FromIterator;
 
 use lazy_static::lazy_static;
+use maplit::btreemap;
+use udgraph::graph::{Comment, DepTriple, Sentence};
+use udgraph::token::{Misc, Token, TokenBuilder};
 
-use crate::graph::{Comment, DepTriple, Sentence};
 use crate::io::{ReadSentence, Reader};
-use crate::token::{Features, Misc, Token, TokenBuilder};
 
 lazy_static! {
     pub static ref TEST_SENTENCES: Vec<Sentence> = {
@@ -26,7 +26,12 @@ lazy_static! {
                 .upos("ART")
                 .xpos("ART")
                 .features(
-                    Features::try_from("case=nominative|gender=feminine|number=singular").unwrap(),
+                    btreemap! {
+                        "case".to_string() => "nominative".to_string(),
+                        "gender".to_string() => "feminine".to_string(),
+                        "number".to_string() => "singular".to_string()
+                    }
+                    .into(),
                 )
                 .deps("2:det")
                 .misc(Misc::from_iter(vec![
@@ -42,7 +47,12 @@ lazy_static! {
                 .upos("N")
                 .xpos("NN")
                 .features(
-                    Features::try_from("case=nominative|gender=feminine|number=singular").unwrap(),
+                    btreemap! {
+                        "case".to_string() => "nominative".to_string(),
+                        "gender".to_string() => "feminine".to_string(),
+                        "number".to_string() => "singular".to_string(),
+                    }
+                    .into(),
                 )
                 .into(),
         );
@@ -61,9 +71,14 @@ lazy_static! {
                 .upos("N")
                 .xpos("NE")
                 .features(
-                    Features::try_from("case=nominative|gender=masculine|number=singular").unwrap(),
+                    btreemap! {
+                        "case".to_string() => "nominative".to_string(),
+                        "gender".to_string() => "masculine".to_string(),
+                        "number".to_string() => "singular".to_string(),
+                    }
+                    .into(),
                 )
-                .misc(Misc::from("NE=per"))
+                .misc(btreemap! { "NE".to_string() => Some("per".to_string()) }.into())
                 .into(),
         );
         s2.push(
@@ -72,9 +87,14 @@ lazy_static! {
                 .upos("N")
                 .xpos("NE")
                 .features(
-                    Features::try_from("case=nominative|gender=masculine|number=singular").unwrap(),
+                    btreemap! {
+                        "case".to_string() => "nominative".to_string(),
+                        "gender".to_string() => "masculine".to_string(),
+                        "number".to_string() => "singular".to_string(),
+                    }
+                    .into(),
                 )
-                .misc(Misc::from("NE=per"))
+                .misc(btreemap! { "NE".to_string() => Some("per".to_string()) }.into())
                 .into(),
         );
         s2.dep_graph_mut()
@@ -92,10 +112,9 @@ lazy_static! {
         let mut s4 = Sentence::new();
         s4.push(
             TokenBuilder::new("Amsterdam")
-                .misc(Misc::from("NE=loc"))
+                .misc(btreemap! { "NE".to_string() => Some("loc".to_string()) }.into())
                 .into(),
         );
-        eprintln!("{:?}", s4);
         sentences.push(s4);
 
         sentences

@@ -181,7 +181,7 @@ impl Sentence {
     /// the root of the dependency graph:
     ///
     /// ```
-    /// use conllu::graph::{Node, Sentence};
+    /// use udgraph::graph::{Node, Sentence};
     ///
     /// let sentence = Sentence::new();
     /// assert_eq!(sentence[0], Node::Root);
@@ -273,40 +273,6 @@ impl Default for Sentence {
     }
 }
 
-impl Display for Sentence {
-    fn fmt(&self, fmt: &mut Formatter) -> Result<(), fmt::Error> {
-        for comment in self.comments() {
-            writeln!(fmt, "{}", comment)?
-        }
-
-        for i in 1..self.len() {
-            let token = match self[i] {
-                Node::Token(ref token) => token,
-                Node::Root => unreachable!(),
-            };
-
-            let (head, head_rel) = triple_to_string(&self.dep_graph(), i);
-
-            writeln!(
-                fmt,
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
-                i,
-                token.form(),
-                token.lemma().unwrap_or("_"),
-                token.upos().unwrap_or("_"),
-                token.xpos().unwrap_or("_"),
-                String::from(token.features()),
-                head.unwrap_or_else(|| "_".to_string()),
-                head_rel.unwrap_or_else(|| "_".to_string()),
-                token.deps().unwrap_or("_"),
-                String::from(token.misc())
-            )?;
-        }
-
-        Ok(())
-    }
-}
-
 impl FromIterator<Token> for Sentence {
     fn from_iter<T>(iter: T) -> Self
     where
@@ -361,17 +327,6 @@ impl<'a> IntoIterator for &'a mut Sentence {
     fn into_iter(self) -> Self::IntoIter {
         self.iter_mut()
     }
-}
-
-fn triple_to_string(g: &DepGraph, dependent: usize) -> (Option<String>, Option<String>) {
-    //  XXX:return string reference for relation.
-    let head_triple = g.head(dependent);
-    let head = head_triple.as_ref().map(|t| t.head().to_string());
-    let head_rel = head_triple
-        .as_ref()
-        .map(|t| t.relation().unwrap_or("_").to_string());
-
-    (head, head_rel)
 }
 
 impl Eq for Sentence {}

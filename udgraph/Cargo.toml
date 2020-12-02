@@ -1,0 +1,17 @@
+[package]
+name = "udgraph"
+version = "0.6.0"
+edition = "2018"
+authors = ["Daniël de Kok <me@danieldk.eu>"]
+description = "Universal dependency graphs"
+documentation = "https://docs.rs/udgraph/"
+homepage = "https://github.com/danieldk/udgraph"
+repository = "https://github.com/danieldk/udgraph"
+license = "Apache-2.0"
+
+[dependencies]
+petgraph = { version = "0.5", default-features = false }
+
+[dev-dependencies]
+lazy_static = "1"
+maplit = "1"

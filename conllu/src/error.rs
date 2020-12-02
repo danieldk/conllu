@@ -36,12 +36,3 @@ pub enum ParseError {
     #[error("dependency relation without a head: {token:?}")]
     RelationWithoutHead { token: String },
 }
-
-/// Graph errors.
-#[derive(Debug, Error)]
-#[non_exhaustive]
-pub enum GraphError {
-    /// The graph is missing relevant information.
-    #[error("incomplete graph: {value:?}")]
-    IncompleteGraph { value: String },
-}

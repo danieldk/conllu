@@ -3,9 +3,11 @@
 use std::convert::TryFrom;
 use std::io;
 
+use udgraph::graph::{Comment, DepTriple, Sentence};
+use udgraph::token::{Features, Misc, Token, EMPTY_TOKEN};
+
 use crate::error::{IOError, ParseError};
-use crate::graph::{Comment, DepTriple, Sentence};
-use crate::token::{Features, Misc, Token, EMPTY_TOKEN};
+use crate::wrap::{ConlluFeatures, ConlluMisc, ConlluSentence};
 
 /// A trait for objects that can read CoNLL-U `Sentence`s
 pub trait ReadSentence {
@@ -81,8 +83,8 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                 return Ok(Some(sentence));
             }
 
-            if line.starts_with('#') {
-                sentence.comments_mut().push(parse_comment(&line[1..]));
+            if let Some(stripped) = line.strip_prefix('#') {
+                sentence.comments_mut().push(parse_comment(stripped));
                 continue;
             }
 
@@ -96,8 +98,9 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             token.set_xpos(parse_string_field(iter.next()));
             token.set_features(
                 parse_string_field(iter.next())
-                    .map(|s| Features::try_from(s.as_str()))
+                    .map(|s| ConlluFeatures::try_from(s.as_str()))
                     .transpose()?
+                    .map(ConlluFeatures::into_owned)
                     .unwrap_or_else(Features::new),
             );
 
@@ -119,7 +122,8 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
             token.set_misc(
                 parse_string_field(iter.next())
-                    .map(|s| Misc::from(s.as_str()))
+                    .map(|s| ConlluMisc::from(s.as_str()))
+                    .map(ConlluMisc::into_owned)
                     .unwrap_or_else(Misc::new),
             );
 
@@ -257,8 +261,8 @@ impl<W: io::Write> Writer<W> {
     /// use std::str;
     ///
     /// use conllu::io::{Writer, WriteSentence};
-    /// use conllu::graph::Sentence;
-    /// use conllu::token::Token;
+    /// use udgraph::graph::Sentence;
+    /// use udgraph::token::Token;
     ///
     /// let output = Vec::new();
     /// let mut writer = Writer::new(output);
@@ -279,9 +283,9 @@ impl<W: io::Write> WriteSentence for Writer<W> {
     fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), IOError> {
         if self.first {
             self.first = false;
-            write!(self.write, "{}", sentence)?
+            write!(self.write, "{}", ConlluSentence(sentence))?
         } else {
-            write!(self.write, "\n{}", sentence)?
+            write!(self.write, "\n{}", ConlluSentence(sentence))?
         }
 
         Ok(())
@@ -339,9 +343,10 @@ mod tests {
     use std::io::{BufRead, Cursor, Read};
     use std::str;
 
+    use udgraph::graph::Sentence;
+
     use super::{ReadSentence, WriteSentence, Writer};
     use crate::error::IOError;
-    use crate::graph::Sentence;
     use crate::tests::{read_sentences, TEST_SENTENCES};
 
     static BASIC: &str = "testdata/basic.conll";

@@ -2,12 +2,15 @@ use std::io;
 
 use thiserror::Error;
 
+/// CoNLL-U IO error.
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum IOError {
+    /// Error in file IO.
     #[error("error reading treebank")]
     IO(#[from] io::Error),
 
+    /// CoNLL-U parsing error.
     #[error(transparent)]
     Parse(#[from] ParseError),
 }

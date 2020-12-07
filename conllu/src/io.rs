@@ -6,8 +6,8 @@ use std::io;
 use udgraph::graph::{Comment, DepTriple, Sentence};
 use udgraph::token::{Features, Misc, Token, EMPTY_TOKEN};
 
+use crate::display::{ConlluFeatures, ConlluMisc, ConlluSentence};
 use crate::error::{IOError, ParseError};
-use crate::wrap::{ConlluFeatures, ConlluMisc, ConlluSentence};
 
 /// A trait for objects that can read CoNLL-U `Sentence`s
 pub trait ReadSentence {
@@ -283,9 +283,9 @@ impl<W: io::Write> WriteSentence for Writer<W> {
     fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), IOError> {
         if self.first {
             self.first = false;
-            write!(self.write, "{}", ConlluSentence(sentence))?
+            write!(self.write, "{}", ConlluSentence::borrowed(sentence))?
         } else {
-            write!(self.write, "\n{}", ConlluSentence(sentence))?
+            write!(self.write, "\n{}", ConlluSentence::borrowed(sentence))?
         }
 
         Ok(())

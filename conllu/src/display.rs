@@ -1,3 +1,5 @@
+//! Wrappers to display `udgraph` datastructures in CoNLL-U format.
+
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;
@@ -10,8 +12,9 @@ use udgraph::token::{Features, Misc};
 
 use crate::error::ParseError;
 
+/// Wrapper to display/parse features in CoNLL-U format.
 #[derive(Debug, Eq, PartialEq)]
-pub struct ConlluFeatures<'a>(pub Cow<'a, Features>);
+pub struct ConlluFeatures<'a>(Cow<'a, Features>);
 
 impl<'a> ConlluFeatures<'a> {
     pub fn borrowed(features: &'a Features) -> Self {
@@ -74,6 +77,7 @@ impl TryFrom<&str> for ConlluFeatures<'static> {
     }
 }
 
+/// Wrapper to display/parse miscellaneous features in CoNLL-U format.
 pub struct ConlluMisc<'a>(Cow<'a, Misc>);
 
 impl<'a> ConlluMisc<'a> {
@@ -131,7 +135,14 @@ impl From<&str> for ConlluMisc<'static> {
     }
 }
 
-pub struct ConlluSentence<'a>(pub &'a Sentence);
+/// Wrapper to display/parse a sentence graph in CoNLL-U format.
+pub struct ConlluSentence<'a>(&'a Sentence);
+
+impl<'a> ConlluSentence<'a> {
+    pub fn borrowed(sentence: &'a Sentence) -> Self {
+        ConlluSentence(sentence)
+    }
+}
 
 impl<'a> fmt::Display for ConlluSentence<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
@@ -187,8 +198,8 @@ mod tests {
     use maplit::btreemap;
     use udgraph::token::{Features, Token, TokenBuilder};
 
+    use crate::display::ConlluFeatures;
     use crate::error::ParseError;
-    use crate::wrap::ConlluFeatures;
 
     #[test]
     fn features_from_iter_as_string() {

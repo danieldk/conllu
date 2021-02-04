@@ -10,7 +10,7 @@ repository = "https://github.com/danieldk/udgraph"
 license = "Apache-2.0"
 
 [dependencies]
-itertools = "0.9"
+itertools = "0.10"
 petgraph = { version = "0.5", default-features = false }
 thiserror = "1"
 udgraph = { path = "../udgraph", version = "0.6" }

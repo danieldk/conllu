@@ -282,7 +282,10 @@ where
     where
         I: IntoIterator<Item = (S, T)>,
     {
-        let features = BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.into())));
+        let features = iter
+            .into_iter()
+            .map(|(k, v)| (k.into(), v.into()))
+            .collect();
 
         Features { inner: features }
     }
@@ -343,8 +346,10 @@ where
     where
         I: IntoIterator<Item = (S, Option<T>)>,
     {
-        let misc =
-            BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
+        let misc = iter
+            .into_iter()
+            .map(|(k, v)| (k.into(), v.map(Into::into)))
+            .collect();
 
         Misc { inner: misc }
     }

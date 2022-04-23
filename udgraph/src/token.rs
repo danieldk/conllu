@@ -385,7 +385,7 @@ impl<'a> Iterator for TokenIter<'a> {
     type Item = &'a Token;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(node) = self.inner.next() {
+        for node in self.inner.by_ref() {
             if let Node::Token(token) = node {
                 return Some(token);
             }
@@ -404,7 +404,7 @@ impl<'a> Iterator for TokenIterMut<'a> {
     type Item = &'a mut Token;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(node) = self.inner.next() {
+        for node in self.inner.by_ref() {
             if let Node::Token(token) = node {
                 return Some(token);
             }

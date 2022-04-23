@@ -52,7 +52,7 @@ impl HeadProjectivizer {
                 .expect("Endpoints of lifted edge could not be found");
 
             if let Some(new_head) =
-                self.search_attachment_point(&graph, cur_head, *lifted_node, pref_head_rel)
+                self.search_attachment_point(graph, cur_head, *lifted_node, pref_head_rel)
             {
                 let head_rel = graph
                     .remove_edge(head_edge)

@@ -7,6 +7,7 @@ use itertools::Itertools;
 use petgraph::graph::{node_index, EdgeIndex, NodeIndex};
 use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
 use petgraph::{Directed, Direction, Graph};
+use udgraph::error::GraphError as UDGraphError;
 use udgraph::graph::{DepTriple, Sentence};
 
 use crate::{BfsWithDepth, GraphError};
@@ -204,7 +205,12 @@ impl Projectivize for HeadProjectivizer {
 
         // The graph is now a projective tree. Update the dependency relations
         // in the sentence to correspond to the graph.
-        update_sentence(&graph, sentence);
+        let r = update_sentence(&graph, sentence);
+        // This is an algorithmic error, not something we want to bubble up.
+        assert!(
+            r.is_ok(),
+            "Deprojectivization add relation with unknown head/dependent"
+        );
 
         Ok(())
     }
@@ -236,7 +242,12 @@ impl Deprojectivize for HeadProjectivizer {
             lifted_sorted.remove(idx);
         }
 
-        update_sentence(&graph, sentence);
+        let r = update_sentence(&graph, sentence);
+        // This is an algorithmic error, not something we want to bubble up.
+        assert!(
+            r.is_ok(),
+            "Deprojectivization add relation with unknown head/dependent"
+        );
 
         Ok(())
     }
@@ -310,15 +321,20 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
 }
 
 /// Update a sentence with dependency relations from a graph.
-fn update_sentence(graph: &Graph<(), String, Directed>, sentence: &mut Sentence) {
+fn update_sentence(
+    graph: &Graph<(), String, Directed>,
+    sentence: &mut Sentence,
+) -> Result<(), UDGraphError> {
     let mut sent_graph = sentence.dep_graph_mut();
     for edge_ref in graph.edge_references() {
         sent_graph.add_deprel(DepTriple::new(
             edge_ref.source().index(),
             Some(edge_ref.weight().clone()),
             edge_ref.target().index(),
-        ));
+        ))?;
     }
+
+    Ok(())
 }
 
 #[cfg(test)]

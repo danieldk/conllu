@@ -58,9 +58,11 @@ lazy_static! {
         );
 
         s1.dep_graph_mut()
-            .add_deprel(DepTriple::new(2, Some("DET"), 1));
+            .add_deprel(DepTriple::new(2, Some("DET"), 1))
+            .unwrap();
         s1.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("ROOT"), 2));
+            .add_deprel(DepTriple::new(0, Some("ROOT"), 2))
+            .unwrap();
 
         sentences.push(s1);
 
@@ -98,9 +100,11 @@ lazy_static! {
                 .into(),
         );
         s2.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("ROOT"), 1));
+            .add_deprel(DepTriple::new(0, Some("ROOT"), 1))
+            .unwrap();
         s2.dep_graph_mut()
-            .add_deprel(DepTriple::new(1, Some("APP"), 2));
+            .add_deprel(DepTriple::new(1, Some("APP"), 2))
+            .unwrap();
         sentences.push(s2);
 
         let mut s3 = Sentence::new();

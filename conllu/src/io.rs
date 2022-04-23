@@ -65,7 +65,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                     return Ok(None);
                 }
 
-                add_edges(&mut sentence, edges);
+                add_edges(&mut sentence, edges)?;
 
                 return Ok(Some(sentence));
             }
@@ -78,7 +78,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                     continue;
                 }
 
-                add_edges(&mut sentence, edges);
+                add_edges(&mut sentence, edges)?;
 
                 return Ok(Some(sentence));
             }
@@ -132,10 +132,12 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
     }
 }
 
-fn add_edges(sentence: &mut Sentence, edges: Vec<DepTriple<String>>) {
+fn add_edges(sentence: &mut Sentence, edges: Vec<DepTriple<String>>) -> Result<(), ParseError> {
     for edge in edges {
-        sentence.dep_graph_mut().add_deprel(edge);
+        sentence.dep_graph_mut().add_deprel(edge)?;
     }
+
+    Ok(())
 }
 
 /// An iterator over the sentences in a `Reader`.
@@ -355,6 +357,8 @@ mod tests {
 
     static EMPTY: &str = "testdata/empty.conll";
 
+    static INCORRECT_HEAD: &str = "testdata/incorrect-head.conll";
+
     fn read_file(filename: &str) -> Result<String, IOError> {
         let mut f = File::open(filename)?;
         let mut contents = String::new();
@@ -384,6 +388,15 @@ mod tests {
     #[test]
     fn reader_marked_empty() {
         test_parsing(&*TEST_SENTENCES, EMPTY);
+    }
+
+    #[test]
+    #[should_panic(expected = "HeadOutOfBounds")]
+    fn reader_rejects_incorrect_head() {
+        let data = read_file(INCORRECT_HEAD).unwrap();
+        let mut reader = super::Reader::new(string_reader(&data));
+        assert!(reader.read_sentence().is_ok());
+        reader.read_sentence().unwrap();
     }
 
     #[test]

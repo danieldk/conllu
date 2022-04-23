@@ -1,6 +1,7 @@
 use std::io;
 
 use thiserror::Error;
+use udgraph::error::GraphError;
 
 /// CoNLL-U IO error.
 #[derive(Debug, Error)]
@@ -19,6 +20,10 @@ pub enum IOError {
 #[derive(Debug, Error, Eq, PartialEq)]
 #[non_exhaustive]
 pub enum ParseError {
+    /// Error construction the graph.
+    #[error(transparent)]
+    Parse(#[from] GraphError),
+
     /// The form is missing in the CoNLL-U data.
     #[error("form field is missing")]
     MissingFormField,

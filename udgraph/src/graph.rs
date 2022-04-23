@@ -10,6 +10,7 @@ use petgraph::graph::{node_index, DiGraph, NodeIndices, NodeWeightsMut};
 use petgraph::visit::EdgeRef;
 use petgraph::Direction;
 
+use crate::error::GraphError;
 use crate::token::Token;
 
 /// Dependency graph node.
@@ -445,18 +446,23 @@ impl<'a> DepGraphMut<'a> {
     ///
     /// If `dependent` already has a head relation, this relation is removed
     /// to ensure single-headedness.
-    pub fn add_deprel<S>(&mut self, triple: DepTriple<S>)
+    pub fn add_deprel<S>(&mut self, triple: DepTriple<S>) -> Result<(), GraphError>
     where
         S: Into<String>,
     {
-        assert!(
-            triple.head() < self.inner.node_count(),
-            "Head out of bounds"
-        );
-        assert!(
-            triple.dependent() < self.inner.node_count(),
-            "dependent out of bounds"
-        );
+        if triple.head() >= self.inner.node_count() {
+            return Err(GraphError::HeadOutOfBounds {
+                head: triple.head(),
+                node_count: self.inner.node_count(),
+            });
+        }
+
+        if triple.dependent() >= self.inner.node_count() {
+            return Err(GraphError::DependentOutOfBounds {
+                dependent: triple.head(),
+                node_count: self.inner.node_count(),
+            });
+        }
 
         // Remove existing head relation (when present).
         if let Some(id) = self
@@ -474,6 +480,8 @@ impl<'a> DepGraphMut<'a> {
             node_index(triple.dependent),
             (self.relation_type, triple.relation.map(Into::into)),
         );
+
+        Ok(())
     }
 
     /// Return an iterator over the dependents of `head`.
@@ -574,9 +582,11 @@ mod tests {
         g.push(Token::new("test"));
         g.push(Token::new("dit"));
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("wrong"), 1));
+            .add_deprel(DepTriple::new(0, Some("wrong"), 1))
+            .unwrap();
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("root"), 2));
+            .add_deprel(DepTriple::new(0, Some("root"), 2))
+            .unwrap();
 
         assert!(g.dep_graph().head(0).is_none());
         assert_eq!(
@@ -590,9 +600,11 @@ mod tests {
         assert!(g.dep_graph().head(3).is_none());
 
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(2, Some("subj"), 1));
+            .add_deprel(DepTriple::new(2, Some("subj"), 1))
+            .unwrap();
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(2, Some("obj1"), 3));
+            .add_deprel(DepTriple::new(2, Some("obj1"), 3))
+            .unwrap();
         assert_eq!(
             g.dep_graph().head(1),
             Some(DepTriple::new(2, Some("subj"), 1))
@@ -610,11 +622,14 @@ mod tests {
         g.push(Token::new("test"));
         g.push(Token::new("dit"));
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("root"), 2));
+            .add_deprel(DepTriple::new(0, Some("root"), 2))
+            .unwrap();
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(2, Some("subj"), 1));
+            .add_deprel(DepTriple::new(2, Some("subj"), 1))
+            .unwrap();
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(2, Some("obj1"), 3));
+            .add_deprel(DepTriple::new(2, Some("obj1"), 3))
+            .unwrap();
 
         let deps = g.dep_graph().dependents(0).collect::<Vec<_>>();
         assert_eq!(&deps, &[DepTriple::new(0, Some("root"), 2)]);
@@ -649,17 +664,22 @@ mod tests {
 
         let mut g3 = g1.clone();
         g1.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("root"), 3));
+            .add_deprel(DepTriple::new(0, Some("root"), 3))
+            .unwrap();
         g1.dep_graph_mut()
-            .add_deprel(DepTriple::new(3, Some("subj"), 1));
+            .add_deprel(DepTriple::new(3, Some("subj"), 1))
+            .unwrap();
         assert_ne!(g1, g3);
         g3.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("root"), 3));
+            .add_deprel(DepTriple::new(0, Some("root"), 3))
+            .unwrap();
         g3.dep_graph_mut()
-            .add_deprel(DepTriple::new(3, Some("subj"), 1));
+            .add_deprel(DepTriple::new(3, Some("subj"), 1))
+            .unwrap();
         assert_eq!(g1, g3);
         g3.dep_graph_mut()
-            .add_deprel(DepTriple::new(3, Some("foobar"), 1));
+            .add_deprel(DepTriple::new(3, Some("foobar"), 1))
+            .unwrap();
         assert_ne!(g1, g3);
 
         let mut g4 = g1.clone();
@@ -670,15 +690,41 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "HeadOutOfBounds")]
+    fn incorrect_head_is_rejected() {
+        let mut g = Sentence::default();
+        g.push(Token::new("Daniël"));
+        g.push(Token::new("test"));
+        g.push(Token::new("dit"));
+        g.dep_graph_mut()
+            .add_deprel(DepTriple::new(4, Some("test"), 3))
+            .unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "DependentOutOfBounds")]
+    fn incorrect_dependent_is_rejected() {
+        let mut g = Sentence::default();
+        g.push(Token::new("Daniël"));
+        g.push(Token::new("test"));
+        g.push(Token::new("dit"));
+        g.dep_graph_mut()
+            .add_deprel(DepTriple::new(3, Some("test"), 4))
+            .unwrap();
+    }
+
+    #[test]
     fn remove_deprel() {
         let mut g = Sentence::default();
         g.push(Token::new("Daniël"));
         g.push(Token::new("test"));
         g.push(Token::new("dit"));
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("wrong"), 1));
+            .add_deprel(DepTriple::new(0, Some("wrong"), 1))
+            .unwrap();
         g.dep_graph_mut()
-            .add_deprel(DepTriple::new(0, Some("root"), 2));
+            .add_deprel(DepTriple::new(0, Some("root"), 2))
+            .unwrap();
         assert_eq!(
             g.dep_graph_mut().remove_head_rel(1),
             Some(DepTriple::new(0, Some("wrong".to_owned()), 1))

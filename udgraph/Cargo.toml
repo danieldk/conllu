@@ -11,6 +11,7 @@ license = "Apache-2.0"
 
 [dependencies]
 petgraph = { version = "0.6", default-features = false }
+thiserror = "1"
 
 [dev-dependencies]
 lazy_static = "1"

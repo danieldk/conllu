@@ -1,5 +1,5 @@
 mod error;
-pub use error::ProjectivizeError;
+pub use error::Error;
 
 mod graph_algo;
 pub(crate) use crate::graph_algo::BfsWithDepth;

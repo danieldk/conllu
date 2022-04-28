@@ -1,12 +1,9 @@
 use std::io;
 
-use thiserror::Error;
-use udgraph::error::GraphError;
-
 /// CoNLL-U IO error.
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
-pub enum IOError {
+pub enum Error {
     /// Error in file IO.
     #[error("error reading treebank")]
     IO(#[from] io::Error),
@@ -17,12 +14,12 @@ pub enum IOError {
 }
 
 /// CoNLL-U parsing errors.
-#[derive(Debug, Error, Eq, PartialEq)]
+#[derive(Debug, thiserror::Error, Eq, PartialEq)]
 #[non_exhaustive]
 pub enum ParseError {
     /// Error construction the graph.
     #[error(transparent)]
-    Parse(#[from] GraphError),
+    Parse(#[from] udgraph::Error),
 
     /// The form is missing in the CoNLL-U data.
     #[error("form field is missing")]

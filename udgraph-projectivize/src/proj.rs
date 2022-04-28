@@ -7,17 +7,17 @@ use itertools::Itertools;
 use petgraph::graph::{node_index, EdgeIndex, NodeIndex};
 use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
 use petgraph::{Directed, Direction, Graph};
-use udgraph::error::GraphError;
 use udgraph::graph::{DepTriple, Sentence};
+use udgraph::Error as UDError;
 
-use crate::{BfsWithDepth, ProjectivizeError};
+use crate::{BfsWithDepth, Error};
 
 pub trait Deprojectivize {
-    fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), ProjectivizeError>;
+    fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), Error>;
 }
 
 pub trait Projectivize {
-    fn projectivize(&self, sentence: &mut Sentence) -> Result<(), ProjectivizeError>;
+    fn projectivize(&self, sentence: &mut Sentence) -> Result<(), Error>;
 }
 
 /// A projectivizer using the 'head' marking strategy. See: *Pseudo-Projective
@@ -188,7 +188,7 @@ impl Default for HeadProjectivizer {
 }
 
 impl Projectivize for HeadProjectivizer {
-    fn projectivize(&self, sentence: &mut Sentence) -> Result<(), ProjectivizeError> {
+    fn projectivize(&self, sentence: &mut Sentence) -> Result<(), Error> {
         let mut graph = simplify_graph(sentence)?;
         let mut lifted = HashSet::new();
 
@@ -217,7 +217,7 @@ impl Projectivize for HeadProjectivizer {
 }
 
 impl Deprojectivize for HeadProjectivizer {
-    fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), ProjectivizeError> {
+    fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), Error> {
         let graph = simplify_graph(sentence)?;
 
         // Find nodes and corresponding edges that are lifted and remove
@@ -253,9 +253,7 @@ impl Deprojectivize for HeadProjectivizer {
     }
 }
 
-pub fn simplify_graph(
-    sentence: &Sentence,
-) -> Result<Graph<(), String, Directed>, ProjectivizeError> {
+pub fn simplify_graph(sentence: &Sentence) -> Result<Graph<(), String, Directed>, Error> {
     let mut edges = Vec::with_capacity(sentence.len() + 1);
     for idx in 0..sentence.len() {
         let triple = match sentence.dep_graph().head(idx) {
@@ -266,7 +264,7 @@ pub fn simplify_graph(
         let head_rel = match triple.relation() {
             Some(head_rel) => head_rel,
             None => {
-                return Err(ProjectivizeError::IncompleteGraph {
+                return Err(Error::IncompleteGraph {
                     value: format!(
                         "edge from {} to {} does not have a label",
                         triple.head(),
@@ -326,7 +324,7 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
 fn update_sentence(
     graph: &Graph<(), String, Directed>,
     sentence: &mut Sentence,
-) -> Result<(), GraphError> {
+) -> Result<(), UDError> {
     let mut sent_graph = sentence.dep_graph_mut();
     for edge_ref in graph.edge_references() {
         sent_graph.add_deprel(DepTriple::new(

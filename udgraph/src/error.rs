@@ -1,9 +1,7 @@
-use thiserror::Error;
-
 /// Graph processing error.
-#[derive(Debug, Error, Eq, PartialEq)]
+#[derive(Debug, thiserror::Error, Eq, PartialEq)]
 #[non_exhaustive]
-pub enum GraphError {
+pub enum Error {
     #[error("dependent {dependent:?} is out of bounds for graph with {node_count:?} vertices")]
     DependentOutOfBounds { dependent: usize, node_count: usize },
 

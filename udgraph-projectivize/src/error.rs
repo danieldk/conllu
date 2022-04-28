@@ -1,9 +1,7 @@
-use thiserror::Error;
-
 /// Graph errors.
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
-pub enum ProjectivizeError {
+pub enum Error {
     /// The graph is missing relevant information.
     #[error("incomplete graph: {value:?}")]
     IncompleteGraph { value: String },

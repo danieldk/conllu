@@ -10,7 +10,7 @@ use petgraph::graph::{node_index, DiGraph, NodeIndices, NodeWeightsMut};
 use petgraph::visit::EdgeRef;
 use petgraph::Direction;
 
-use crate::error::GraphError;
+use crate::error::Error;
 use crate::token::Token;
 
 /// Dependency graph node.
@@ -446,19 +446,19 @@ impl<'a> DepGraphMut<'a> {
     ///
     /// If `dependent` already has a head relation, this relation is removed
     /// to ensure single-headedness.
-    pub fn add_deprel<S>(&mut self, triple: DepTriple<S>) -> Result<(), GraphError>
+    pub fn add_deprel<S>(&mut self, triple: DepTriple<S>) -> Result<(), Error>
     where
         S: Into<String>,
     {
         if triple.head() >= self.inner.node_count() {
-            return Err(GraphError::HeadOutOfBounds {
+            return Err(Error::HeadOutOfBounds {
                 head: triple.head(),
                 node_count: self.inner.node_count(),
             });
         }
 
         if triple.dependent() >= self.inner.node_count() {
-            return Err(GraphError::DependentOutOfBounds {
+            return Err(Error::DependentOutOfBounds {
                 dependent: triple.head(),
                 node_count: self.inner.node_count(),
             });

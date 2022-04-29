@@ -4,10 +4,12 @@ use std::convert::TryFrom;
 use std::io;
 
 use udgraph::graph::{Comment, DepTriple, Sentence};
-use udgraph::token::{Features, Misc, Token, EMPTY_TOKEN};
+use udgraph::token::{Features, Misc, Token};
 
 use crate::display::{ConlluFeatures, ConlluMisc, ConlluSentence};
 use crate::error::{Error, ParseError};
+
+const EMPTY_FIELD: &str = "_";
 
 /// A trait for objects that can read CoNLL-U `Sentence`s
 pub trait ReadSentence {
@@ -181,7 +183,7 @@ fn parse_form_field(field: Option<&str>) -> Result<String, ParseError> {
 
 fn parse_string_field(field: Option<&str>) -> Option<String> {
     field.and_then(|s| {
-        if s == EMPTY_TOKEN {
+        if s == EMPTY_FIELD {
             None
         } else {
             Some(s.to_string())
@@ -195,7 +197,7 @@ fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>, ParseErr
             value: "A token identifier should be present".to_owned(),
         }),
         Some(s) => {
-            if s == EMPTY_TOKEN {
+            if s == EMPTY_FIELD {
                 return Err(ParseError::ParseIdentifierField {
                     value: s.to_owned(),
                 });
@@ -214,7 +216,7 @@ fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, ParseError>
     match field {
         None => Ok(None),
         Some(s) => {
-            if s == EMPTY_TOKEN {
+            if s == EMPTY_FIELD {
                 Ok(None)
             } else {
                 Ok(Some(s.parse::<usize>().map_err(|_| {

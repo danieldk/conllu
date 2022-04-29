@@ -7,8 +7,6 @@ use std::ops::{Deref, DerefMut};
 
 use crate::graph::{Iter, IterMut, Node, Sentence};
 
-pub const EMPTY_TOKEN: &str = "_";
-
 /// A builder for `Token`s.
 ///
 /// The `Token` type stores a CoNLL-U token. However, since this format

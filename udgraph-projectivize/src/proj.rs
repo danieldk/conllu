@@ -12,15 +12,27 @@ use udgraph::Error as UDError;
 
 use crate::{BfsWithDepth, Error};
 
+/// Graph deprojectivizer.
 pub trait Deprojectivize {
+    /// Deprojectivize a graph
+    ///
+    /// This method rewrites a projective graph into a non-projective graph.
+    /// Depending on the (de)projectivizer, this could require additional
+    /// information in dependency labels to guide the deprojectivization.
     fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), Error>;
 }
 
+/// Graph projectivizer.
 pub trait Projectivize {
+    /// Projectivize a graph
+    ///
+    /// This method rewrites a non-projective graph into a projective graph.
+    /// Depending on the projectivizer, this may add additional information
+    /// to the dependency labels to undo the projectivization later.
     fn projectivize(&self, sentence: &mut Sentence) -> Result<(), Error>;
 }
 
-/// A projectivizer using the 'head' marking strategy. See: *Pseudo-Projective
+/// A projectivizer using the 'head'-marking strategy. See: *Pseudo-Projective
 /// Dependency Parsing*, Nivre and Nilsson, 2005.
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub struct HeadProjectivizer;

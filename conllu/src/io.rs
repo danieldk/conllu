@@ -11,7 +11,7 @@ use crate::error::{Error, ParseError};
 
 const EMPTY_FIELD: &str = "_";
 
-/// A trait for objects that can read CoNLL-U `Sentence`s
+/// A trait for objects that can read CoNLL-U [`Sentence`]s
 pub trait ReadSentence {
     /// Read a `Sentence` from this object.
     ///
@@ -37,7 +37,7 @@ pub struct Reader<R> {
 
 impl<R: io::BufRead> Reader<R> {
     /// Construct a new reader from an object that implements the
-    /// `io::BufRead` trait.
+    /// [`BufRead`](std::io::BufRead) trait.
     pub fn new(read: R) -> Reader<R> {
         Reader { read }
     }
@@ -142,7 +142,7 @@ fn add_edges(sentence: &mut Sentence, edges: Vec<DepTriple<String>>) -> Result<(
     Ok(())
 }
 
-/// An iterator over the sentences in a `Reader`.
+/// An iterator over the sentences in a [`Reader`].
 pub struct Sentences<R>
 where
     R: ReadSentence,
@@ -229,7 +229,7 @@ fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, ParseError>
     }
 }
 
-/// A trait for objects that can write CoNLL-U `Sentence`s.
+/// A trait for objects that can write CoNLL-U [`Sentence`]s.
 pub trait WriteSentence {
     /// Write a sentence into this object.
     ///
@@ -250,8 +250,8 @@ pub struct Writer<W> {
 }
 
 impl<W: io::Write> Writer<W> {
-    /// Construct a new writer from an object that implements the `io::Write`
-    /// trait.
+    /// Construct a new writer from an object that implements the
+    /// [`Write`](std::io::Write) trait.
     pub fn new(write: W) -> Writer<W> {
         Writer { write, first: true }
     }

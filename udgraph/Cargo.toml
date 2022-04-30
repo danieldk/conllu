@@ -7,7 +7,7 @@ description = "Universal dependency graphs"
 documentation = "https://docs.rs/udgraph/"
 homepage = "https://github.com/danieldk/udgraph"
 repository = "https://github.com/danieldk/udgraph"
-license = "Apache-2.0"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 petgraph = { version = "0.6", default-features = false }

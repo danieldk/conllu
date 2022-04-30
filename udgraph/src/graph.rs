@@ -165,9 +165,10 @@ pub type Edge = (RelationType, Option<String>);
 /// in the graph.
 ///
 /// This data structure is a thin wrapper around the `petgraph`
-/// `DiGraph` data structure that enforces variants such as
-/// single-headedness. The `into_inner`/`get_ref` methods can
-/// be used to unwrap or get a reference to the wrapped graph.
+/// [`DiGraph`](petgraph::graph::DiGraph) data structure that enforces
+/// variants such as single-headedness. The
+/// [`into_inner`](Sentence::into_inner)/[`get_ref`](Sentence::get_ref)
+/// methods can be used to unwrap or get a reference to the wrapped graph.
 #[derive(Clone, Debug)]
 pub struct Sentence {
     comments: Vec<Comment>,
@@ -204,12 +205,13 @@ impl Sentence {
         &mut self.comments
     }
 
-    /// Get a reference to the `DiGraph` of the sentence.
+    /// Get a reference to the [`DiGraph`](petgraph::graph::DiGraph) of
+    /// the sentence.
     pub fn get_ref(&self) -> &DiGraph<Node, Edge> {
         &self.graph
     }
 
-    /// Unwrap the `DiGraph` of the sentence.
+    /// Unwrap the  [`DiGraph`](petgraph::graph::DiGraph) of the sentence.
     pub fn into_inner(self) -> DiGraph<Node, Edge> {
         self.graph
     }
@@ -433,8 +435,8 @@ impl<'a, 'b> PartialEq<DepGraph<'b>> for DepGraph<'a> {
 ///
 /// This data structure provides a mutable view of a CoNLL-U dependency
 /// graph. The view can be used to retrieve the dependents of a head or
-/// the head of a dependent. In addition, the `add_deprel` method can be
-/// used to add dependency relations to the graph.
+/// the head of a dependent. In addition, the [`add_deprel`](DepGraphMut::add_deprel)
+/// method can be used to add dependency relations to the graph.
 pub struct DepGraphMut<'a> {
     inner: &'a mut DiGraph<Node, Edge>,
     relation_type: RelationType,

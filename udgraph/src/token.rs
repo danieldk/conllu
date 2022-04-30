@@ -7,17 +7,18 @@ use std::ops::{Deref, DerefMut};
 
 use crate::graph::{Iter, IterMut, Node, Sentence};
 
-/// A builder for `Token`s.
+/// A builder for [`Token`]s.
 ///
 /// The `Token` type stores a CoNLL-U token. However, since this format
 /// permits a large number of fields, construction of a token can get
-/// tedious. This builder provides a fluent interface for creating `Token`s.
+/// tedious. This builder provides a fluent interface for creating [`Token`]
+/// instances.
 pub struct TokenBuilder {
     token: Token,
 }
 
 impl TokenBuilder {
-    /// Create a `Token` builder with all non-form fields set to absent.
+    /// Create a [`TokenBuilder`] with all non-form fields set to absent.
     pub fn new(form: impl Into<String>) -> TokenBuilder {
         TokenBuilder {
             token: Token::new(form),
@@ -82,6 +83,15 @@ impl From<TokenBuilder> for Token {
     }
 }
 
+/// Token
+///
+/// The `Token` type stores a CoNLL-U token. Various information can be
+/// associated with a token, such as its lemma, (universal) part-of-speech,
+/// morphological features, and other (miscellaneous) features.
+///
+/// `Token`s are typically stored as vertices in a
+/// [`DepGraph`](crate::graph::DepGraph), so that their dependency heads
+/// and dependents can be queried.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Token {
     form: String,

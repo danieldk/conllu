@@ -1,6 +1,6 @@
 [package]
 name = "conllu"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2018"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
 description = "Readers/writers for the CoNLL-U dependency format"
@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 itertools = "0.10"
 thiserror = "1"
-udgraph = { path = "../udgraph", version = "0.7" }
+udgraph = { path = "../udgraph", version = "0.8" }
 
 [dev-dependencies]
 lazy_static = "1"

@@ -1,6 +1,6 @@
 [package]
 name = "udgraph"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2018"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
 description = "Universal dependency graphs"

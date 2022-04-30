@@ -7,7 +7,7 @@ description = "Projectivization/deprojectivization for universal dependency grap
 documentation = "https://docs.rs/udgraph/"
 homepage = "https://github.com/danieldk/udgraph"
 repository = "https://github.com/danieldk/udgraph"
-license = "Apache-2.0"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 itertools = "0.10"
